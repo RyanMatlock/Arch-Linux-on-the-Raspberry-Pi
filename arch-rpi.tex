@@ -413,7 +413,9 @@ To change the password, enter
 \begin{lstlisting}
 # passwd </<username>/>
 \end{lstlisting}
-which in my case is set to \lstinline{**********}.  To force a user to change this password on their first login, run
+which in my case is set to \lstinline{**********}.
+
+To force a user to change this password on their first login, run
 \begin{lstlisting}
 chage -d 0 </<username>/>
 \end{lstlisting}
@@ -439,7 +441,15 @@ To switch between users,
 \end{lstlisting}
 
 \subsection{User Groups and \lstinline{sudo}}
+%As it stands, our new user doesn't have as many privileges as \lstinline{root}.  This is desireable because it limits the amount of damage that can be done by a user.
 
+To add a user to a group or groups, run
+\begin{lstlisting}
+# usermod -aG </<additional groups>/> </<username>/>
+\end{lstlisting}
+Note that if the \lstinline{-a} flag is omitted, the user is removed from all groups not explicity named in \lstinline{</<additional groups>/>}.
+
+Before adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
 
 
 %%followed by a table that looks something like
