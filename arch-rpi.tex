@@ -1,7 +1,5 @@
 \documentclass[12pt,letterpaper]{article}
 
-
-
 \usepackage{booktabs,longtable,tabu} % for nice-looking tables
 \usepackage[binary-units=true]{siunitx} % for units
 \usepackage{listings} % for code
@@ -13,7 +11,7 @@
 \usepackage{amsmath,amssymb}
 %\usepackage{schemata} % stretchy curly braces in text mode %% looks like I can only get left-pointing braces, and I need right-pointing braces
 \usepackage{hyperref}
-\usepackage{xcolor}
+\usepackage[svgnames]{xcolor}
 \usepackage{textcomp} % enables upquote, textlangle, textrangle
 \usepackage{datetime}
 \usepackage{calc}
@@ -40,9 +38,9 @@
 \urlstyle{sf}
 \hypersetup{%
 	colorlinks=true,
-	linkcolor=magenta,
+	linkcolor=MediumVioletRed, 
 		%blue,
-	urlcolor=blue,
+	urlcolor=Blue,
 }
 
 \newcommand\high{\textsc{high}}
@@ -68,7 +66,13 @@
 
 %% xcolor package
 \definecolor{codebg}{HTML}{EEEEEE}
+%\definecolor{codebg}{HTML}{333333} %% this shows off the ugly white lines between code lines, which you need to fix 
 \definecolor{codeframe}{HTML}{CCCCCC}
+
+\newcommand\UserSpecificInputStyle{\color{Purple}\sltt}
+\newcommand\ListingEmphasis{\sltt}
+\newcommand\UserTyping{\color{Green}}
+\newcommand\KeyboardInput{\color{Green}}
 
 \lstset{%
 	backgroundcolor=\color{codebg},
@@ -79,18 +83,18 @@
 	%upquote=true, %% the terminal output on the Pi doesn't appear to use upquotes, so why should I?
 	basicstyle=\ttfamily,
 	breaklines=true,
-	postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}},
+	postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}},
 	commentstyle=\ttfamily,
 	belowskip=-2pt,
 	aboveskip=6pt,
 	% delimits user-specific inputs -- should be surrounded by <> so you have </<user-specific input>/>
-	moredelim=[is][\color{violet}\sltt]{/<}{>/}, % [is] means delimiteres are invisible, not nestable
+	moredelim=[is][\UserSpecificInputStyle]{/<}{>/}, % [is] means delimiteres are invisible, not nestable
 	% emphasis in listing
-	moredelim=[is][\sltt]{/|}{/|},
+	moredelim=[is][\ListingEmphasis]{/|}{/|},
 	% what the user should type in
-	moredelim=[is][\color{green}]{/[}{/]},
-	% keyboard inputs
-	moredelim=[is][\color{limegreen}]{/kbd/[}{/]}
+	moredelim=[is][\UserTyping]{/[}{/]},
+	% keyboard inputs, surround with <> so you have </[[RETURN/]]>, for example
+	moredelim=[is][\KeyboardInput]{/[[}{/]]}
 }
 
 %\newenvironment{aside}
@@ -142,6 +146,23 @@ This guide aims to show the reader how to
 \item ??? install Lynx (text-based web browser)
 \end{enumerate}
 
+\section{Syntax Guide}
+In order to avoid any confusion, here's a brief overview of the special syntax used in this document:
+\begin{table}[!h]\centering
+\caption{\label{tab:syntax} Syntax guide}\smallskip
+\begin{tabu}{@{} p{0.35\textwidth} l p{0.35\textwidth} @{}}
+\toprule
+Description & Example & Meaning \\
+\midrule
+bracketed purple slanted text & \lstinline{</<username>/>} & something to be entered by the user, the exact choice of which is up to them (note that brackets are to be omitted) \\
+green text & \lstinline{/[n/]} & exact user input, often found in a large block of prompts and outputs \\
+bracketed green text & \lstinline{</[[RETURN/]]>} & special key input \\
+red hook right arrow & \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}} & line continuation character (i.e.\ in actual input/output, there is no linebreak) \\
+plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should be entered by the user \\
+\bottomrule
+\end{tabu}
+\end{table}
+
 \section{Configuring Arch: The Hard Way}
 
 \subsection{Installation}
@@ -181,6 +202,7 @@ $ dd bs=1m if=/path/to/ArchLinuxARM*-rpi.img of=/dev/rdiskN
 \end{lstlisting}
 as root\footnote{Some guides recommend using \lstinline{of=/dev/diskN} instead of \lstinline{of=/dev/diskN} for increased security as \lstinline{rdiskN} is the raw path, while \lstinline{diskN} is a buffered device. (source: % note that with hyperref package, certain characters (e.g. #) must be escaped with a slash in the URL
 \url{http://elinux.org/RPi_Easy_SD_Card_Setup\#Flashing_the_SD_card_using_Mac_OS~X}) }. %(this may take awhile\footnote{approximately 6 minutes on a 2010 MacBook Pro onto a Class~10 \SI{16}{\giga\byte} SD card}---especially if you omit the \lstinline{bs=1m} part).
+Personal testing revealed that
 
 tested on identical Class 4, \SI{4}{\giga\byte} SD cards:
 \begin{lstlisting}
@@ -219,11 +241,13 @@ for which the username and password are simply \lstinline{root}.
 source:
 \url{http://jan.alphadev.net/post/53594241659/growing-the-rpi-root-partition}} by logging in as \lstinline{root}.
 
-\item Run
+\item Run \lstinline{fdisk} on the SD card with
 \begin{lstlisting}
 # fdisk /dev/mmcblk0
 \end{lstlisting}
-then enter \lstinline{p} to display the partition table, which looks something like the following\footnote{This example was performed on a \SI{4}{\giga\byte} class~4 SanDisk SDHC card.  With the exception of the \lstinline{Disk} and \lstinline{Disk identifier} entries, all the numbers are in agreement with those posted on the previously referenced Jan's Stuff ``Growing the RPi root partition'' blog entry (but that concerned a \SI{32}{\giga\byte} disk, and the identifier is presumably unique).}:
+
+\item
+Print the partition table, which looks something like the following\footnote{This example was performed on a \SI{4}{\giga\byte} class~4 SanDisk SDHC card.  With the exception of the \lstinline{Disk} and \lstinline{Disk identifier} entries, all the numbers are in agreement with those posted on the previously referenced Jan's Stuff ``Growing the RPi root partition'' blog entry (but that concerned a \SI{32}{\giga\byte} disk, and the identifier is presumably unique).}:
 
 
 %%\newlength{\enumitextwidth}
@@ -232,6 +256,8 @@ then enter \lstinline{p} to display the partition table, which looks something l
 %%
 %%\begin{minipage}[!h]{\enumitextwidth}\footnotesize
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Command (m for help): /[p/]
+
 Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -256,82 +282,94 @@ The first partition is the boot partition.  The second is an extended partition 
 %Also, n
 Note the distinction between \si{\mebi\byte} (1~mebibyte \(=1024\cdot1024\) bytes) and \si{\mega\byte} (1 megabyte \(=10^6\) bytes).  I've tried to be consistent in this document, but mistakes have a way of creeping in, and it's ultimately not terribly important.}, which is only a fraction of the disk's available space.
 
-\item Now we must delete partition~2 by entering \lstinline{d}, which will produce
-
+\item Now we must delete partition~2:
 \begin{lstlisting}
-Command (m for help): d
-Partition number (1,2,5, default 5):
-\end{lstlisting}
-Enter \lstinline{2}, so we have
+Command (m for help): /[d/]
 
-\begin{lstlisting}
-Partition number (1,2,5, default 5): 2
-
+Partition number (1,2,5, default 5): /[2/]
 Partition 2 has been deleted.
 \end{lstlisting}
 
-If you enter \lstinline{p}, you'll see that partition~5 is also gone because it was contained within partition~2.
+If you print the partition table (i.e.\ enter \lstinline{/[p/]}), you'll see that partition~5 is also gone because it was contained within partition~2.
 
-\item We will now recreate the extended partition.  Enter \lstinline{n}, so we have
+% and here marks the dramatic shift in tone that occurred between when this document was started and when it was resumed
+\item We will now recreate the extended partition.  Add a new partition in the following manner\footnote{Rather than pressing \kbd{\return} where indicated, you could manually enter the number, make a mistake, and \emph{ruin everything}, but I think the former way is easier since the latter still involves pressing \kbd{\return}.}:
 
 \begin{lstlisting}
-Command (m for help): n
+Command (m for help): /[n/]
 
 Partition type:
   p  primary (1 primary, 0 extended, 3 free)
   e  extended
-Select (default p):
-\end{lstlisting}
-enter \lstinline{e},
-\begin{lstlisting}
-Select (default p): e
-Partition number (2-4, default 2):
-\end{lstlisting}
-enter \lstinline{2},
-\begin{lstlisting}
-Partition number (2-4, default 2): 2
+Select (default p): /[e/]
+Partition number (2-4, default 2): /[2/]
 First sector (186368-7744511, default 186368):
-\end{lstlisting}
-press \kbd{\return} 
-% and here marks the dramatic shift in tone that occurred between when this document was started and when it was resumed
-(or manually enter the number, make a mistake, and \emph{ruin everything}),
-\begin{lstlisting}
+</[[RETURN/]]>
 Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511):
-\end{lstlisting}
-press \kbd{\return}, which results in
-\begin{lstlisting}
+</[[RETURN/]]>
 Created a new partition 2 of type 'Extended' and a size of 3.6 GiB.
 \end{lstlisting}
+
 The extended partition has now been created, but this time it occupies the disk space not taken up by the boot partition.
+%We will now recreate the extended partition.  Enter \lstinline{n}, so we have
+%
+%\begin{lstlisting}
+%Command (m for help): n
+%
+%Partition type:
+%  p  primary (1 primary, 0 extended, 3 free)
+%  e  extended
+%Select (default p):
+%\end{lstlisting}
+%enter \lstinline{e},
+%\begin{lstlisting}
+%Select (default p): e
+%Partition number (2-4, default 2):
+%\end{lstlisting}
+%enter \lstinline{2},
+%\begin{lstlisting}
+%Partition number (2-4, default 2): 2
+%First sector (186368-7744511, default 186368):
+%\end{lstlisting}
+%press \kbd{\return} 
+%% and here marks the dramatic shift in tone that occurred between when this document was started and when it was resumed
+%(or manually enter the number, make a mistake, and \emph{ruin everything}),
+%\begin{lstlisting}
+%Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511):
+%\end{lstlisting}
+%press \kbd{\return}, which results in
+%\begin{lstlisting}
+%Created a new partition 2 of type 'Extended' and a size of 3.6 GiB.
+%\end{lstlisting}
+%The extended partition has now been created, but this time it occupies the disk space not taken up by the boot partition.
 
 \item \label{item:root} The root partition will now be recreated following a similar process.  For the sake of brevity, I won't detail each step but instead show it done all at once.
 
 Note: it is \emph{absolutely critical} that the first block of the old and new partition match.  The data within the old partition is still there; all we're doing is resizing the partition while keeping its data intact.  Changing the starting block can (and almost assuredly will) render useless the data we want to preserve.
 \begin{lstlisting}
-Command (m for help): n
+Command (m for help): /[n/]
 
 Partition type:
   p  primary (1 primary, 1 extended, 2 free)
   l  logical (numbered from 5)
-Select (default p): l
+Select (default p): /[l/]
 
 Adding logical partition 5
 First sector (188416-7744511, default 188416):
-\end{lstlisting}
-\kbd{\return}
-\begin{lstlisting}
+</[[RETURN/]]>
 Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511):
-\end{lstlisting}
-\kbd{\return}
-\begin{lstlisting}
+</[[RETURN/]]>
 Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
 \end{lstlisting}
 Success!
 
 \item Well, not so fast.  We haven't actually written any of our changes yet, and we also want to make sure that we got the first block of our root partition right (see the note in step~\ref{item:root}).
 
-To do that, enter \lstinline{p}, and you should see the following:
+%To do that, enter \lstinline{p}, and you should see the following:
+To do that, print the partition table:
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Command (m for help): /[p/]
+
 Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
 Units: sectors of 1 * 512 = 512 bytes
 Sector size (logical/physical): 512 bytes / 512 bytes
@@ -344,8 +382,10 @@ Device         Boot   Start      End  Blocks  Id System
 /dev/mmcblk0p2       186368  7744511 3779072  5 Extended
 /dev/mmcblk0p5       186416  7744511 3778048 83 Linux
 \end{lstlisting}
-Looks like everything checks out, so enter \lstinline{w} to write the changes, which will give the following message (and should not cause you to worry):
+Looks like everything checks out, so %enter \lstinline{w} to write the changes, which will give the following message (and should not cause you to worry):
+write the table to disk and exit (and don't worry about the failure warning):
 \begin{lstlisting}
+Command (m for help): /[w/]
 The partition table has been altered.
 Calling ioctl() to re-read partition table.
 Re-reading the partition table failed.: Device or resource busy
