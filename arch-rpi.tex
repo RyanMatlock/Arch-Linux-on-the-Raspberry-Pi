@@ -83,9 +83,14 @@
 	commentstyle=\ttfamily,
 	belowskip=-2pt,
 	aboveskip=6pt,
-	% delimits user-specific inputs
+	% delimits user-specific inputs -- should be surrounded by <> so you have </<user-specific input>/>
 	moredelim=[is][\color{violet}\sltt]{/<}{>/}, % [is] means delimiteres are invisible, not nestable
+	% emphasis in listing
 	moredelim=[is][\sltt]{/|}{/|},
+	% what the user should type in
+	moredelim=[is][\color{green}]{/[}{/]},
+	% keyboard inputs
+	moredelim=[is][\color{limegreen}]{/kbd/[}{/]}
 }
 
 %\newenvironment{aside}
@@ -447,9 +452,23 @@ To add a user to a group or groups, run
 \begin{lstlisting}
 # usermod -aG </<additional groups>/> </<username>/>
 \end{lstlisting}
-Note that if the \lstinline{-a} flag is omitted, the user is removed from all groups not explicity named in \lstinline{</<additional groups>/>}.
+Note that if the \lstinline{-a} flag is omitted, the user is removed from all groups not explicity named in \lstinline{</<additional groups>/>}.  For the sake of clarity, here are the groups to which I added \lstinline{matlock}:
+\begin{lstlisting}
+# usermod -aG users,rfkill,wheel matlock
+\end{lstlisting}
+The documentation I found didn't explictly state that \lstinline{</<additional groups>/>} is a list of groups separated by commas without spaces, but that's probably obvious to most people.
 
-Before adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
+You can verify that you've properly assigned groups to a user with the command
+\begin{lstlisting}
+# groups </<username>/>
+\end{lstlisting}
+
+%Before adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
+
+First, listing groups is similar to listing users; it's simply
+\begin{lstlisting}
+# cat /etc/group
+\end{lstlisting}
 
 
 %%followed by a table that looks something like
