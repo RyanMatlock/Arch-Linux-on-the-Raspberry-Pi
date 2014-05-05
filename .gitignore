@@ -1,0 +1,22 @@
+# OS X cruft
+.DS_Store
+
+# Emacs cruft
+*~
+[#]*[#]
+.\#*
+
+# LaTeX cruft
+*.aux
+*.log
+*.synctex.gz
+*.idx
+*.dvi
+*.toc
+*.out
+
+# Python cruft
+*.py~
+
+# gitinfo -- including this file is disruptive to Git
+gitHeadInfo.gin

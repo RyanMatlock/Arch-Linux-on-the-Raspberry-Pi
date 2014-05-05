@@ -1,0 +1,459 @@
+\documentclass[12pt,letterpaper]{article}
+
+
+
+\usepackage{booktabs,longtable,tabu} % for nice-looking tables
+\usepackage[binary-units=true]{siunitx} % for units
+\usepackage{listings} % for code
+%\usepackage[grumpy]{gitinfo} % for Git hash (i.e. versioning)
+\usepackage{underscore} % so you can use underscores
+\usepackage{pdflscape} % for bill of materials page
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb}
+%\usepackage{schemata} % stretchy curly braces in text mode %% looks like I can only get left-pointing braces, and I need right-pointing braces
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{textcomp} % enables upquote, textlangle, textrangle
+\usepackage{datetime}
+\usepackage{calc}
+\usepackage{mdframed}
+\usepackage{fontenc} % slanted tt font
+
+\usepackage{fixltx2e}
+
+
+\yyyymmdddate
+
+\newcommand\gittext[1]{\texttt{#1}}
+
+\newcommand\siwordspace{\,}
+\DeclareSIUnit\block{\siwordspace block}
+\DeclareSIUnit\blocks{\siwordspace blocks}
+\DeclareSIUnit\bytes{\siwordspace bytes} % for when you want "bytes" spelled out
+
+\sisetup{%
+	digitsep=comma,
+}
+
+\renewcommand{\sfdefault}{phv} % phv is Helvetica
+\urlstyle{sf}
+\hypersetup{%
+	colorlinks=true,
+	linkcolor=magenta,
+		%blue,
+	urlcolor=blue,
+}
+
+\newcommand\high{\textsc{high}}
+\newcommand\low{\textsc{low}}
+
+% keyboard input
+\newcommand\kbd[1]{\textlangle\texttt{#1}\textrangle}
+\newcommand\return{RETURN}
+
+
+%\renewcommand{\thefootnote}{\fnsymbol{footnote}}
+
+%%%% listings stuff
+
+%% define slanted tt font
+\newcommand\sltt{%
+	\fontfamily{cmtt}%
+	\fontseries{m}%
+	\fontshape{sl}%
+	\selectfont%
+}
+
+
+%% xcolor package
+\definecolor{codebg}{HTML}{EEEEEE}
+\definecolor{codeframe}{HTML}{CCCCCC}
+
+\lstset{%
+	backgroundcolor=\color{codebg},
+	%language=bash,
+	frame=single,
+	framesep=2pt,
+	rulecolor=\color{codeframe},
+	%upquote=true, %% the terminal output on the Pi doesn't appear to use upquotes, so why should I?
+	basicstyle=\ttfamily,
+	breaklines=true,
+	postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{red}\hookrightarrow\space}},
+	commentstyle=\ttfamily,
+	belowskip=-2pt,
+	aboveskip=6pt,
+	% delimits user-specific inputs
+	moredelim=[is][\color{violet}\sltt]{/<}{>/}, % [is] means delimiteres are invisible, not nestable
+	moredelim=[is][\sltt]{/|}{/|},
+}
+
+%\newenvironment{aside}
+%	{\begin{mdframed}[style=0,%
+%		leftline=false,rightline=false,leftmargin=2em,%rightmargin=2em,%
+%		innertopmargin=8pt,innerbottommargin=2pt,%
+%		innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.5pt,%
+%		skipabove=2pt,skipbelow=2pt]}
+%	{\end{mdframed}}
+
+\begin{document}
+
+
+\title{Arch Linux on the Raspberry Pi}
+\author{Ryan Matlock, Magzor Corp.}
+\date{\today}
+\maketitle
+%\footnotetext{Last commit: \gittext{\gitAbbrevHash} by \gittext{\gitAuthorName} on \gittext{\gitAuthorIsoDate}}
+
+\begin{abstract}
+Arch is a Linux distribution built around ``\href{https://wiki.archlinux.org/index.php/The_Arch_Way}{The Arch Way},''\footnote{\url{https://wiki.archlinux.org/index.php/The_Arch_Way}} a philosophy of simplicity, code-correctness, user-centricity, openness, and freedom.  Simplicity lends itself to a minimalist approach, which in turn leads to lower system resource overhead---exactly what one wants in an embedded system.  Code-correctness means that the software is clean, correct, and simple, which implies a greater degree of comprehensibility and predictability, albeit sometimes accompanied with a steeper learning curve.  User-centricity, not to be confused with user-friendliness, manifests itself as giving the user complete control over their %% using a plural pronoun (e.g. they, them, their) with a singular antecdent has a rich history in English going back to at least the 16th century, and it's preferable to using singular masculine pronouns everywhere or coining new singular pronouns
+system.  %But as Spiderman's Uncle Ben (or maybe Voltaire) said, ``With great power comes great responsibility,'' which in the case of Arch means that a do-it-yourself approach to problems is expected.
+Openness and freedom allow for greater control of the system; as Arch Linux's founder, Judd Vinet said, ``[Arch Linux] is what \emph{you} make it.''
+\end{abstract}
+
+\tableofcontents
+
+%\lstinline[backgroundcolor=\color{codebg}]{hi there} %% turns out background coloring of lstinline text is slightly nontrivial
+
+\section{Overview}
+This guide aims to show the reader how to
+\begin{enumerate}
+\item install Arch Linux for Raspberry Pi onto a blank SD card,
+\item expand the root partition to fill the disk,
+\item add a new user,
+\item modify user groups and grant superuser privileges,
+\item establish wireless connectivity,
+\item enable SSH access,
+\item install GNU Compiler Collection (GCC), % 4.9+ because of C++11 support (see: http://gcc.gnu.org/projects/cxx1y.html)
+\item install Python 3,
+\item install WiringPi library,
+\item install pigpio library,
+\item install RPi.GPIO library,
+%\item install GNU nano, %% nano is already installed
+\item install GNU Emacs 24+,
+\item set up Emacs,
+\item \ldots
+\item ??? install watchdog d\ae mon -- reboots Pi on failure \url{http://pi.gadgetoid.com/article/who-watches-the-watcher}
+\item ??? install Lynx (text-based web browser)
+\end{enumerate}
+
+\section{Configuring Arch: The Hard Way}
+
+\subsection{Installation}
+%\begin{enumerate}
+%\item 
+Download the Arch Linux disk image from \url{http://archlinuxarm.org/platforms/armv6/raspberry-pi} and follow the instructions.
+(Note: for Mac OS X\footnote{The \lstinline{bash} terminal is assumed to be used, so user input lines are started with \lstinline{$}.  Later, the \lstinline{tty} prompt of Arch will start user input lines with \lstinline{#}%, although I'm going to go with \lstinline{>} because the \LaTeX\ \lstinline{listings} package treats \lstinline{#} as a comment %% added commenstyle=\ttfamily to lstset, so it's not a problem
+.}, the process is a little different\footnote{source: \url{http://www.embeddedarm.com/support/faqs.php?item=10}}:
+
+\begin{enumerate}
+\item Plug in your SD card and run
+
+\begin{lstlisting}
+$ diskutil list
+\end{lstlisting}
+
+to find the \lstinline{/dev/diskN} node (e.g. \lstinline{disk3}, which is the \lstinline{sdX} in the linked instructions) on which it's located.
+
+\item Unmount the drive by running
+
+\begin{lstlisting}
+$ diskutil unmountDisk /dev/diskN
+\end{lstlisting}
+
+which will print
+
+\begin{lstlisting}
+Unmount of all volumes on diskN was successful
+\end{lstlisting}
+
+if successful.
+
+\item Write the Arch image by running
+
+\begin{lstlisting}
+$ dd bs=1m if=/path/to/ArchLinuxARM*-rpi.img of=/dev/rdiskN
+\end{lstlisting}
+as root\footnote{Some guides recommend using \lstinline{of=/dev/diskN} instead of \lstinline{of=/dev/diskN} for increased security as \lstinline{rdiskN} is the raw path, while \lstinline{diskN} is a buffered device. (source: % note that with hyperref package, certain characters (e.g. #) must be escaped with a slash in the URL
+\url{http://elinux.org/RPi_Easy_SD_Card_Setup\#Flashing_the_SD_card_using_Mac_OS~X}) }. %(this may take awhile\footnote{approximately 6 minutes on a 2010 MacBook Pro onto a Class~10 \SI{16}{\giga\byte} SD card}---especially if you omit the \lstinline{bs=1m} part).
+
+tested on identical Class 4, \SI{4}{\giga\byte} SD cards:
+\begin{lstlisting}
+matlocksmacbook:~ matlock$ sudo dd bs=1m if=~/Downloads/ArchLinuxARM-2014.04-rpi.img of=/dev/disk4
+1870+0 records in
+1870+0 records out
+1960837120 bytes transferred in 452.680379 secs (4331615 bytes/sec)
+\end{lstlisting}
+
+\begin{lstlisting}
+matlocksmacbook:~ matlock$ sudo dd bs=1m if=~/Downloads/ArchLinuxARM-2014.04-rpi.img of=/dev/rdisk4
+Password:
+1870+0 records in
+1870+0 records out
+1960837120 bytes transferred in 394.117681 secs (4975258 bytes/sec)
+\end{lstlisting}
+
+\end{enumerate}
+
+%\end{enumerate}
+
+\subsection{Expanding the Root Partition}
+%\lstset{language=sh}
+
+When you first boot up the Pi with a fresh Arch Linux installation, you will eventually be greeted with something like
+
+\begin{lstlisting}
+Arch Linux 3.10.35-1-ARCH (tty1)
+
+alarmpi login:
+\end{lstlisting}
+for which the username and password are simply \lstinline{root}.
+
+\begin{enumerate}
+\item Begin\footnote{%sources: \url{http://raspberrypi.stackexchange.com/questions/499/how-can-i-resize-my-root-partition} and 
+source:
+\url{http://jan.alphadev.net/post/53594241659/growing-the-rpi-root-partition}} by logging in as \lstinline{root}.
+
+\item Run
+\begin{lstlisting}
+# fdisk /dev/mmcblk0
+\end{lstlisting}
+then enter \lstinline{p} to display the partition table, which looks something like the following\footnote{This example was performed on a \SI{4}{\giga\byte} class~4 SanDisk SDHC card.  With the exception of the \lstinline{Disk} and \lstinline{Disk identifier} entries, all the numbers are in agreement with those posted on the previously referenced Jan's Stuff ``Growing the RPi root partition'' blog entry (but that concerned a \SI{32}{\giga\byte} disk, and the identifier is presumably unique).}:
+
+
+%%\newlength{\enumitextwidth}
+%%%% using calc package
+%%\setlength{\enumitextwidth}{\textwidth-\leftmargin}
+%%
+%%\begin{minipage}[!h]{\enumitextwidth}\footnotesize
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x417ee54b
+
+Device         Boot  Start      End   Blocks Id System
+/dev/mmcblk0p1        2048   186367    92160  c W95 FAT32 (LBA)
+/dev/mmcblkp2       186368  3667967  1740800  5 Extended
+/dev/mmcblkp5       188416  3667967  1739776 83 Linux
+\end{lstlisting}
+%%\end{minipage}
+
+The first partition is the boot partition.  The second is an extended partition used to overcome the 4~primary partition limit.  The third partition---that is, partition~5---is contained within partition~2, and holds only \SI{849.5}{\mebi\byte}\footnote{%% I might be wrong here because when I try this calculation on the properly resized partition, which fdisk tells me is 3.6 GiB, I get exactly half of that
+%The figure was arrived at in the following manner:
+%\begin{equation*}
+%\SI{1739776}{\blocks}\cdot\frac{\SI{512}{\bytes}}{\SI{1}{\block}}\cdot\frac{\SI{1}{\mebi\byte}}{1024\cdot\SI{1024}{\bytes}}=\SI{849.5}{\mebi\byte}.
+%\end{equation*}
+%Sorry, Jan, but I think you may have made a mistake in your calculation.
+%
+%Also, n
+Note the distinction between \si{\mebi\byte} (1~mebibyte \(=1024\cdot1024\) bytes) and \si{\mega\byte} (1 megabyte \(=10^6\) bytes).  I've tried to be consistent in this document, but mistakes have a way of creeping in, and it's ultimately not terribly important.}, which is only a fraction of the disk's available space.
+
+\item Now we must delete partition~2 by entering \lstinline{d}, which will produce
+
+\begin{lstlisting}
+Command (m for help): d
+Partition number (1,2,5, default 5):
+\end{lstlisting}
+Enter \lstinline{2}, so we have
+
+\begin{lstlisting}
+Partition number (1,2,5, default 5): 2
+
+Partition 2 has been deleted.
+\end{lstlisting}
+
+If you enter \lstinline{p}, you'll see that partition~5 is also gone because it was contained within partition~2.
+
+\item We will now recreate the extended partition.  Enter \lstinline{n}, so we have
+
+\begin{lstlisting}
+Command (m for help): n
+
+Partition type:
+  p  primary (1 primary, 0 extended, 3 free)
+  e  extended
+Select (default p):
+\end{lstlisting}
+enter \lstinline{e},
+\begin{lstlisting}
+Select (default p): e
+Partition number (2-4, default 2):
+\end{lstlisting}
+enter \lstinline{2},
+\begin{lstlisting}
+Partition number (2-4, default 2): 2
+First sector (186368-7744511, default 186368):
+\end{lstlisting}
+press \kbd{\return} 
+% and here marks the dramatic shift in tone that occurred between when this document was started and when it was resumed
+(or manually enter the number, make a mistake, and \emph{ruin everything}),
+\begin{lstlisting}
+Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511):
+\end{lstlisting}
+press \kbd{\return}, which results in
+\begin{lstlisting}
+Created a new partition 2 of type 'Extended' and a size of 3.6 GiB.
+\end{lstlisting}
+The extended partition has now been created, but this time it occupies the disk space not taken up by the boot partition.
+
+\item \label{item:root} The root partition will now be recreated following a similar process.  For the sake of brevity, I won't detail each step but instead show it done all at once.
+
+Note: it is \emph{absolutely critical} that the first block of the old and new partition match.  The data within the old partition is still there; all we're doing is resizing the partition while keeping its data intact.  Changing the starting block can (and almost assuredly will) render useless the data we want to preserve.
+\begin{lstlisting}
+Command (m for help): n
+
+Partition type:
+  p  primary (1 primary, 1 extended, 2 free)
+  l  logical (numbered from 5)
+Select (default p): l
+
+Adding logical partition 5
+First sector (188416-7744511, default 188416):
+\end{lstlisting}
+\kbd{\return}
+\begin{lstlisting}
+Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511):
+\end{lstlisting}
+\kbd{\return}
+\begin{lstlisting}
+Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
+\end{lstlisting}
+Success!
+
+\item Well, not so fast.  We haven't actually written any of our changes yet, and we also want to make sure that we got the first block of our root partition right (see the note in step~\ref{item:root}).
+
+To do that, enter \lstinline{p}, and you should see the following:
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x417ee54b
+
+Device         Boot   Start      End  Blocks  Id System
+/dev/mmcblk0p1         2048   186367   92160   c W95 FAT32 (LBA)
+/dev/mmcblk0p2       186368  7744511 3779072  5 Extended
+/dev/mmcblk0p5       186416  7744511 3778048 83 Linux
+\end{lstlisting}
+Looks like everything checks out, so enter \lstinline{w} to write the changes, which will give the following message (and should not cause you to worry):
+\begin{lstlisting}
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Re-reading the partition table failed.: Device or resource busy
+
+The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+\end{lstlisting}
+
+\item Reboot the system:
+\begin{lstlisting}
+# reboot
+\end{lstlisting}
+
+\item When the system restarts, log back in as \lstinline{root}.
+
+\item (optional) We will use \lstinline{resize2fs} to actually resize the partitions, but first, let's run \lstinline{df} and see what our filesystem looks like currently (displayed in an abbreviated form):
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+# df
+Filesystem       1K-blocks   Used Available Use% Mounted on
+/dev/root          1679632 441176   1135084  28% /
+...
+/dev/mmcblk0p1       91962  25328     66634  28% /boot
+...
+\end{lstlisting}
+
+\item Now it's time to use \lstinline{resize2fs}:
+\begin{lstlisting}
+# resize2fs /dev/mmcblk0p5
+resize2fs 1.42.9 (28-Dec-2013)
+Filesystem at /dev/mmcblk0p5 is mounted on /; on-line resizing requited
+old_desc_blocks = 1, new_desc_blocks = 1
+The filesystem on /dev/mmcblk0p5 is now 944512 blocks long.
+\end{lstlisting}
+
+\item (optional) Finally, we'll run a quick check with \lstinline{df} to see how our filesystem looks now:
+\begin{lstlisting}[basicstyle=\ttfamily\scriptsize]
+# df
+Filesystem       1K-blocks   Used Available Use% Mounted on
+/dev/root          3688608 442024   3065496  13% /
+...
+/dev/mmcblk0p1       91962  25328     66634  28% /boot
+...
+\end{lstlisting}
+Now only 13\% of the root partition is being used instead of 28\%, which is a quick and easy sanity check.
+
+\subsection{Adding a User}
+
+It's generally considered unsafe to log in as root\footnote{see \url{http://www.slackbook.org/html/shell.html} and \url{http://lmgtfy.com/?q=why+shouldn\%27t+you+log+in+as+root}}, so we will add a user\footnote{source: \url{https://wiki.archlinux.org/index.php/users_and_groups}}.  To see what users currently exist, run
+
+\begin{lstlisting}
+# cat /etc/passwd
+\end{lstlisting}
+which lists users in the format
+\begin{lstlisting}
+account:password:UID:GID:GECOS:directory:shell
+\end{lstlisting}
+where \lstinline{UID} is the user ID, \lstinline{GID} is the primary group ID, \lstinline{GECOS} is an optional field usually containing the full user name, \lstinline{directory} is the path of \lstinline{$HOME}, and \lstinline{shell} is the user's command interpreter, which defaults to \lstinline{/bin/sh}.
+
+Adding a user is straightforward, and uses the following syntax:
+
+\begin{lstlisting}
+# useradd -m -g </<initial group>/> -G </<additional groups>/> -s </<login shell>/> </<username>/>
+\end{lstlisting}
+We'll worry about groups in the next section, so for now enter something like
+\begin{lstlisting}
+# useradd -m -s /bin/bash matlock
+\end{lstlisting}
+although I generally suggest you pick a different username unless you're a relative or an Andy Griffith fan.
+
+To change the password, enter
+\begin{lstlisting}
+# passwd </<username>/>
+\end{lstlisting}
+which in my case is set to \lstinline{**********}.  To force a user to change this password on their first login, run
+\begin{lstlisting}
+chage -d 0 </<username>/>
+\end{lstlisting}
+(Yes, that's right, it's \lstinline{chage}, not change---remember that \lstinline{ch/|age/|} deals with password \emph{age}, not password change.)
+
+The \lstinline{GECOS} field is edited by issuing the command
+\begin{lstlisting}
+# chfn </<username>/>
+\end{lstlisting}
+but doing so is not especially important.
+
+%\begin{aside}
+If you're ever curious as to what user you are, it's a simple as
+\begin{lstlisting}
+# whoami
+\end{lstlisting}
+which may be among the least arcane Linux commands.
+%\end{aside}
+
+To switch between users,
+\begin{lstlisting}
+# logout
+\end{lstlisting}
+
+\subsection{User Groups and \lstinline{sudo}}
+
+
+
+%%followed by a table that looks something like
+%%\begin{table}[!h]\ttfamily
+%%\begin{tabu}{@{} l l r r r r l @{}}
+%%Device & Boot & Start & End & Blocks & Id & System \\
+%%/dev/mmcblk0p1 & & 2048 & 186367 & 92160 & c & W95 FAT32 (LBA) \\
+%%/dev/mmcblkp2 & & 186368 & 3667967 & 1740800 & 5 & Extended \\
+%%/dev/mmcblkp5 & & 188416 & 3667967 & 1739776 & 83 & Linux
+%%\end{tabu}
+%%\end{table}
+
+\end{enumerate}
+
+
+
+\end{document}
