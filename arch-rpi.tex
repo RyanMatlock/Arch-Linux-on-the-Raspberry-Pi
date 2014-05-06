@@ -65,6 +65,7 @@
 }
 
 \setlength\parskip{2pt plus2pt minus2pt}
+\setlength\parindent{0pt}
 
 
 %% xcolor package
@@ -161,7 +162,7 @@ Description & Example & Meaning \\
 \midrule
 bracketed purple slanted text & \lstinline{<//<username>//>} & something to be entered by the user, the exact choice of which is up to them (note that brackets are to be omitted) \\
 green text & \lstinline{//[n//]} & exact user input, often found in a large block of prompts and outputs \\
-bracketed green text & \lstinline{<///[[RETURN///]]>} & special key input \\
+bracketed green text & \lstinline{<//[[RETURN//]]>} & special key input \\
 red hook right arrow & \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}} & line continuation character (i.e.\ in actual input/output, there is no linebreak) \\
 plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should be entered by the user \\
 \bottomrule
@@ -309,9 +310,9 @@ Partition type:
 Select (default p): //[e//]
 Partition number (2-4, default 2): //[2//]
 First sector (186368-7744511, default 186368):
-<///[[RETURN///]]>
+<//[[RETURN//]]>
 Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511):
-<///[[RETURN///]]>
+<//[[RETURN//]]>
 Created a new partition 2 of type 'Extended' and a size of 3.6 GiB.
 \end{lstlisting}
 
@@ -361,9 +362,9 @@ Select (default p): //[l//]
 
 Adding logical partition 5
 First sector (188416-7744511, default 188416):
-<///[[RETURN///]]>
+<//[[RETURN//]]>
 Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511):
-<///[[RETURN///]]>
+<//[[RETURN//]]>
 Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
 \end{lstlisting}
 Success!
@@ -486,7 +487,27 @@ your wireless device requires firmware to be properly installed and configured. 
 # cp /etc/netctl/examples/wireless-wpa /etc/netctl/<//<profile>//>
 \end{lstlisting}
 
+\item Edit the newly-copied \lstinline{<//<profile>//>} with \lstinline{nano} or \lstinline{vi}\footnote{There may be other editors included in Arch, but \lstinline{# which ed} and \lstinline{# which emacs} both failed, so I'm guessing our choices are very limited.}:
+\begin{lstlisting}
+# nano /etc/netctl/<//<profile>//>
+\end{lstlisting}
+so that it looks something like
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+Description='<//<a descriptive phrase>//>'
+Interface=<//<wifi card name>//>
+Connection=wireless
+Security=wpa
 
+IP==dhcp
+
+ESSID='<//<wifi network name>//>'
+# Prepend hexadecimal keys with \"
+# If your key starts with ", write it as '""<key>"'
+# See also: the section on special quoting rules in netctl.profile(5)
+Key='<//<wifi password>//>' # pick something strong that incorporates letters and numbers like 'password123'
+# Uncomment this if your ssid is hidden
+#Hidden=yes
+\end{lstlisting}
 
 \end{enumerate}
 
@@ -581,6 +602,19 @@ The main groups we care about are \lstinline{users}, \lstinline{rfkill}, and \ls
 %%/dev/mmcblkp5 & & 188416 & 3667967 & 1739776 & 83 & Linux
 %%\end{tabu}
 %%\end{table}
+
+\section{Miscellaneous Useful Commands}
+
+\subsection{Shutdown and reboot as user other than \lstinline{root}}
+Shutdown:
+\begin{lstlisting}
+$ systemctl poweroff
+\end{lstlisting}
+
+Reboot
+\begin{lstlisting}
+$ systemctl reboot
+\end{lstlisting}
 
 
 
