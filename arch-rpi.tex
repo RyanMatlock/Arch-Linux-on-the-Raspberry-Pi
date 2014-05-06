@@ -90,13 +90,13 @@
 	commentstyle=\ttfamily,
 	belowskip=-2pt,
 	aboveskip=6pt,
-	% delimits user-specific inputs -- should be surrounded by <> so you have </<user-specific input>/>
+	% delimits user-specific inputs -- should be surrounded by <> so you have <//<user-specific input>//>
 	moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
 	% emphasis in listing
 	moredelim=[is][\ListingEmphasis]{//|}{//|},
 	% what the user should type in
 	moredelim=[is][\UserTyping]{//[}{//]},
-	% keyboard inputs, surround with <> so you have </[[RETURN/]]>, for example
+	% keyboard inputs, surround with <> so you have <///[[RETURN///]]>, for example
 	moredelim=[is][\KeyboardInput]{//[[}{//]]}
 }
 
@@ -159,9 +159,9 @@ In order to avoid any confusion, here's a brief overview of the special syntax u
 \toprule
 Description & Example & Meaning \\
 \midrule
-bracketed purple slanted text & \lstinline{</<username>/>} & something to be entered by the user, the exact choice of which is up to them (note that brackets are to be omitted) \\
-green text & \lstinline{/[n/]} & exact user input, often found in a large block of prompts and outputs \\
-bracketed green text & \lstinline{</[[RETURN/]]>} & special key input \\
+bracketed purple slanted text & \lstinline{<//<username>//>} & something to be entered by the user, the exact choice of which is up to them (note that brackets are to be omitted) \\
+green text & \lstinline{//[n//]} & exact user input, often found in a large block of prompts and outputs \\
+bracketed green text & \lstinline{<///[[RETURN///]]>} & special key input \\
 red hook right arrow & \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}} & line continuation character (i.e.\ in actual input/output, there is no linebreak) \\
 plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should be entered by the user \\
 \bottomrule
@@ -261,7 +261,7 @@ Print the partition table, which looks something like the following\footnote{Thi
 %%
 %%\begin{minipage}[!h]{\enumitextwidth}\footnotesize
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
-Command (m for help): /[p/]
+Command (m for help): //[p//]
 
 Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
 Units: sectors of 1 * 512 = 512 bytes
@@ -289,29 +289,29 @@ Note the distinction between \si{\mebi\byte} (1~mebibyte \(=1024\cdot1024\) byte
 
 \item Now we must delete partition~2:
 \begin{lstlisting}
-Command (m for help): /[d/]
+Command (m for help): //[d//]
 
-Partition number (1,2,5, default 5): /[2/]
+Partition number (1,2,5, default 5): //[2//]
 Partition 2 has been deleted.
 \end{lstlisting}
 
-If you print the partition table (i.e.\ enter \lstinline{/[p/]}), you'll see that partition~5 is also gone because it was contained within partition~2.
+If you print the partition table (i.e.\ enter \lstinline{//[p//]}), you'll see that partition~5 is also gone because it was contained within partition~2.
 
 % and here marks the dramatic shift in tone that occurred between when this document was started and when it was resumed
 \item We will now recreate the extended partition.  Add a new partition in the following manner\footnote{Rather than pressing \kbd{\return} where indicated, you could manually enter the number, make a mistake, and \emph{ruin everything}, but I think the former way is easier since the latter still involves pressing \kbd{\return}.}:
 
 \begin{lstlisting}
-Command (m for help): /[n/]
+Command (m for help): //[n//]
 
 Partition type:
   p  primary (1 primary, 0 extended, 3 free)
   e  extended
-Select (default p): /[e/]
-Partition number (2-4, default 2): /[2/]
+Select (default p): //[e//]
+Partition number (2-4, default 2): //[2//]
 First sector (186368-7744511, default 186368):
-</[[RETURN/]]>
+<///[[RETURN///]]>
 Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511):
-</[[RETURN/]]>
+<///[[RETURN///]]>
 Created a new partition 2 of type 'Extended' and a size of 3.6 GiB.
 \end{lstlisting}
 
@@ -352,18 +352,18 @@ The extended partition has now been created, but this time it occupies the disk 
 
 Note: it is \emph{absolutely critical} that the first block of the old and new partition match.  The data within the old partition is still there; all we're doing is resizing the partition while keeping its data intact.  Changing the starting block can (and almost assuredly will) render useless the data we want to preserve.
 \begin{lstlisting}
-Command (m for help): /[n/]
+Command (m for help): //[n//]
 
 Partition type:
   p  primary (1 primary, 1 extended, 2 free)
   l  logical (numbered from 5)
-Select (default p): /[l/]
+Select (default p): //[l//]
 
 Adding logical partition 5
 First sector (188416-7744511, default 188416):
-</[[RETURN/]]>
+<///[[RETURN///]]>
 Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511):
-</[[RETURN/]]>
+<///[[RETURN///]]>
 Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
 \end{lstlisting}
 Success!
@@ -373,7 +373,7 @@ Success!
 %To do that, enter \lstinline{p}, and you should see the following:
 To do that, print the partition table:
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
-Command (m for help): /[p/]
+Command (m for help): //[p//]
 
 Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
 Units: sectors of 1 * 512 = 512 bytes
@@ -390,7 +390,7 @@ Device         Boot   Start      End  Blocks  Id System
 Looks like everything checks out, so %enter \lstinline{w} to write the changes, which will give the following message (and should not cause you to worry):
 write the table to disk and exit (and don't worry about the failure warning):
 \begin{lstlisting}
-Command (m for help): /[w/]
+Command (m for help): //[w//]
 The partition table has been altered.
 Calling ioctl() to re-read partition table.
 Re-reading the partition table failed.: Device or resource busy
@@ -483,7 +483,7 @@ your wireless device requires firmware to be properly installed and configured. 
 
 \item Copy a \lstinline{netctl} profile\footnote{In this case, I'm assuming that you're connecting to a network with WPA/WPA2 encryption.  If you want to see what other examples are available, run \lstinline{# ls /etc/netctl/examples}.}:
 \begin{lstlisting}
-# cp /etc/netctl/examples/wireless-wpa /etc/netctl/</<profile>/>
+# cp /etc/netctl/examples/wireless-wpa /etc/netctl/<//<profile>//>
 \end{lstlisting}
 
 
@@ -506,7 +506,7 @@ where \lstinline{UID} is the user ID, \lstinline{GID} is the primary group ID, \
 Adding a user is straightforward, and uses the following syntax:
 
 \begin{lstlisting}
-# useradd -m -g </<initial group>/> -G </<additional groups>/> -s </<login shell>/> </<username>/>
+# useradd -m -g <//<initial group>//> -G <//<additional groups>//> -s <//<login shell>//> <//<username>//>
 \end{lstlisting}
 We'll worry about groups in the next section, so for now enter something like
 \begin{lstlisting}
@@ -516,19 +516,19 @@ although I generally suggest you pick a different username unless you're a relat
 
 To change the password, enter
 \begin{lstlisting}
-# passwd </<username>/>
+# passwd <//<username>//>
 \end{lstlisting}
 which in my case is set to \lstinline{**********}.
 
 To force a user to change this password on their first login, run
 \begin{lstlisting}
-chage -d 0 </<username>/>
+chage -d 0 <//<username>//>
 \end{lstlisting}
-(Yes, that's right, it's \lstinline{chage}, not change---remember that \lstinline{ch/|age/|} deals with password \emph{age}, not password change.)
+(Yes, that's right, it's \lstinline{chage}, not change---remember that \lstinline{ch//|age//|} deals with password \emph{age}, not password change.)
 
 The \lstinline{GECOS} field is edited by issuing the command
 \begin{lstlisting}
-# chfn </<username>/>
+# chfn <//<username>//>
 \end{lstlisting}
 but doing so is not especially important.
 
@@ -550,17 +550,17 @@ To switch between users,
 
 To add a user to a group or groups, run
 \begin{lstlisting}
-# usermod -aG </<additional groups>/> </<username>/>
+# usermod -aG <//<additional groups>//> <//<username>//>
 \end{lstlisting}
-Note that if the \lstinline{-a} flag is omitted, the user is removed from all groups not explicity named in \lstinline{</<additional groups>/>}.  For the sake of clarity, here are the groups to which I added \lstinline{matlock}:
+Note that if the \lstinline{-a} flag is omitted, the user is removed from all groups not explicity named in \lstinline{<//<additional groups>//>}.  For the sake of clarity, here are the groups to which I added \lstinline{matlock}:
 \begin{lstlisting}
 # usermod -aG users,rfkill,wheel matlock
 \end{lstlisting}
-None of documentation I found explictly stated that \lstinline{</<additional groups>/>} is a list of groups separated by commas without spaces, but that's probably obvious to most people.
+None of documentation I found explictly stated that \lstinline{<//<additional groups>//>} is a list of groups separated by commas without spaces, but that's probably obvious to most people.
 
 You can verify that you've properly assigned groups to a user with the command
 \begin{lstlisting}
-# groups </<username>/>
+# groups <//<username>//>
 \end{lstlisting}
 
 Before you go about adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
