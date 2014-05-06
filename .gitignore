@@ -15,6 +15,11 @@
 *.toc
 *.out
 
+# Emacs/LaTeX together cruft:
+*.fls
+*.fdb_latexmk
+/auto
+
 # Python cruft
 *.py~
 

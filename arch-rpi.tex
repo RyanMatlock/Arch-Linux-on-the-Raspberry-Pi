@@ -42,6 +42,7 @@
 		%blue,
 	urlcolor=Blue,
 }
+\newcommand\styledhref[2]{\href{#1}{\sf #2}}
 
 \newcommand\high{\textsc{high}}
 \newcommand\low{\textsc{low}}
@@ -62,6 +63,8 @@
 	\fontshape{sl}%
 	\selectfont%
 }
+
+\setlength\parskip{2pt plus2pt minus2pt}
 
 
 %% xcolor package
@@ -121,6 +124,8 @@ Openness and freedom allow for greater control of the system; as Arch Linux's fo
 \end{abstract}
 
 \tableofcontents
+
+%\the\parskip
 
 %\lstinline[backgroundcolor=\color{codebg}]{hi there} %% turns out background coloring of lstinline text is slightly nontrivial
 
@@ -429,6 +434,49 @@ Filesystem       1K-blocks   Used Available Use% Mounted on
 ...
 \end{lstlisting}
 Now only 13\% of the root partition is being used instead of 28\%, which is a quick and easy sanity check.
+\end{enumerate}
+
+\subsection{Enabling Wireless Connectivity}
+Because of Arch's minimalist approach, very little software is included out of the box---not even something as common as \lstinline{sudo}!  As a result, establishing an internet connection so that additional packages can be downloaded is a high priority in any new Arch installation.  In this case, we're going to assume a wireless connection is being used\footnote{source: \url{https://wiki.archlinux.org/index.php/Wireless_network_configuration}}, specifically a USB wifi adapter\footnote{In my particular case, I'm using an \styledhref{http://lmgtfy.com/?q=\%22Edimax+EW-7811Un\%22}{Edimax EW-7811Un 802.11n USB wifi adapter}}.
+
+\begin{enumerate}
+\item First, the wireless device driver must be determined to be correctly installed.  The Arch wiki suggests checking the output of
+\begin{lstlisting}
+# lsusb -v
+\end{lstlisting}
+but it appears to produce screenfuls of output that would only be helpful to the kind of person not reading this document.  The other suggestion is to look at the output of
+\begin{lstlisting}
+# dmesg | grep usbcore
+\end{lstlisting}
+which for me output a few lines, one of which was
+\begin{lstlisting}
+[   9.216794] usbcore: registered new interface driver rt18192cu
+\end{lstlisting}
+which is what the wiki said to expect.  
+
+\item Check the output of
+\begin{lstlisting}
+# ip link
+\end{lstlisting}
+which in my case has five entries, the last of which is what we're looking for (i.e. something starting with a w, like \lstinline{wlan0}):
+\begin{lstlisting}
+...
+5: wlan0: <BROADCAST,MULTICAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000
+    link/ether 80:1f:02:bf:11:68 brd ff:ff:ff:ff:ff:ff
+\end{lstlisting}
+
+\item Run
+\begin{lstlisting}
+# ip link set wlan0 up
+\end{lstlisting}
+If you see the message
+\begin{lstlisting}
+SIOCSIFFLAGS: No such file or directory
+\end{lstlisting}
+your wireless device requires firmware to be properly installed and configured.  Since everything seems to be working for me, you can work out the details for yourself if you've encountered an issue at this point.
+
+
+\end{enumerate}
 
 \subsection{Adding a User}
 
@@ -496,19 +544,20 @@ Note that if the \lstinline{-a} flag is omitted, the user is removed from all gr
 \begin{lstlisting}
 # usermod -aG users,rfkill,wheel matlock
 \end{lstlisting}
-The documentation I found didn't explictly state that \lstinline{</<additional groups>/>} is a list of groups separated by commas without spaces, but that's probably obvious to most people.
+None of documentation I found explictly stated that \lstinline{</<additional groups>/>} is a list of groups separated by commas without spaces, but that's probably obvious to most people.
 
 You can verify that you've properly assigned groups to a user with the command
 \begin{lstlisting}
 # groups </<username>/>
 \end{lstlisting}
 
-%Before adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
+Before you go about adding a user to a group, it's helpful to know what groups exist, the purpose of existing groups, and how to create/delete groups.
 
 First, listing groups is similar to listing users; it's simply
 \begin{lstlisting}
 # cat /etc/group
 \end{lstlisting}
+The main groups we care about are \lstinline{users}, \lstinline{rfkill}, and \lstinline{wheel}.
 
 
 %%followed by a table that looks something like
@@ -520,8 +569,6 @@ First, listing groups is similar to listing users; it's simply
 %%/dev/mmcblkp5 & & 188416 & 3667967 & 1739776 & 83 & Linux
 %%\end{tabu}
 %%\end{table}
-
-\end{enumerate}
 
 
 
