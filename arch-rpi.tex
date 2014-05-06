@@ -91,13 +91,13 @@
 	belowskip=-2pt,
 	aboveskip=6pt,
 	% delimits user-specific inputs -- should be surrounded by <> so you have </<user-specific input>/>
-	moredelim=[is][\UserSpecificInputStyle]{/<}{>/}, % [is] means delimiteres are invisible, not nestable
+	moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
 	% emphasis in listing
-	moredelim=[is][\ListingEmphasis]{/|}{/|},
+	moredelim=[is][\ListingEmphasis]{//|}{//|},
 	% what the user should type in
-	moredelim=[is][\UserTyping]{/[}{/]},
+	moredelim=[is][\UserTyping]{//[}{//]},
 	% keyboard inputs, surround with <> so you have </[[RETURN/]]>, for example
-	moredelim=[is][\KeyboardInput]{/[[}{/]]}
+	moredelim=[is][\KeyboardInput]{//[[}{//]]}
 }
 
 %\newenvironment{aside}
@@ -437,7 +437,7 @@ Now only 13\% of the root partition is being used instead of 28\%, which is a qu
 \end{enumerate}
 
 \subsection{Enabling Wireless Connectivity}
-Because of Arch's minimalist approach, very little software is included out of the box---not even something as common as \lstinline{sudo}!  As a result, establishing an internet connection so that additional packages can be downloaded is a high priority in any new Arch installation.  In this case, we're going to assume a wireless connection is being used\footnote{source: \url{https://wiki.archlinux.org/index.php/Wireless_network_configuration}}, specifically a USB wifi adapter\footnote{In my particular case, I'm using an \styledhref{http://lmgtfy.com/?q=\%22Edimax+EW-7811Un\%22}{Edimax EW-7811Un 802.11n USB wifi adapter}}.
+Because of Arch's minimalist approach, very little software is included out of the box---not even something as common as \lstinline{sudo}!  As a result, establishing an internet connection so that additional packages can be downloaded is a high priority in any new Arch installation.  In this case, we're going to assume a wireless connection is being used\footnote{sources: \url{https://wiki.archlinux.org/index.php/Wireless_network_configuration} and \url{http://raspberrypi.stackexchange.com/questions/7987/wifi-configuration-on-arch-linux-arm}}, specifically a USB wifi adapter\footnote{In my particular case, I'm using an \styledhref{http://lmgtfy.com/?q=\%22Edimax+EW-7811Un\%22}{Edimax EW-7811Un 802.11n USB wifi adapter}}.
 
 \begin{enumerate}
 \item First, the wireless device driver must be determined to be correctly installed.  The Arch wiki suggests checking the output of
@@ -474,6 +474,18 @@ If you see the message
 SIOCSIFFLAGS: No such file or directory
 \end{lstlisting}
 your wireless device requires firmware to be properly installed and configured.  Since everything seems to be working for me, you can work out the details for yourself if you've encountered an issue at this point.
+
+% nevermind, netctl is already there
+%\item Install \lstinline{netctl} with the command
+%\begin{lstlisting}
+%# pacman -S netctl
+%\end{lstlisting}
+
+\item Copy a \lstinline{netctl} profile\footnote{In this case, I'm assuming that you're connecting to a network with WPA/WPA2 encryption.  If you want to see what other examples are available, run \lstinline{# ls /etc/netctl/examples}.}:
+\begin{lstlisting}
+# cp /etc/netctl/examples/wireless-wpa /etc/netctl/</<profile>/>
+\end{lstlisting}
+
 
 
 \end{enumerate}
