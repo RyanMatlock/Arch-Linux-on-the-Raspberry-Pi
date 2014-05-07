@@ -11,7 +11,7 @@
 \usepackage{amsmath,amssymb}
 %\usepackage{schemata} % stretchy curly braces in text mode %% looks like I can only get left-pointing braces, and I need right-pointing braces
 \usepackage{hyperref}
-\usepackage[svgnames]{xcolor}
+\usepackage[svgnames,dvipsnames]{xcolor}
 \usepackage{textcomp} % enables upquote, textlangle, textrangle
 \usepackage{datetime}
 \usepackage{calc}
@@ -33,6 +33,9 @@
 \sisetup{%
 	digitsep=comma,
 }
+
+\newcommand\Emph[1]{\textbf{#1}}
+\newcommand\EMPH[1]{\textbf{\textit{#1}}}
 
 \renewcommand{\sfdefault}{phv} % phv is Helvetica
 \urlstyle{sf}
@@ -64,6 +67,14 @@
 	\selectfont%
 }
 
+%% define bf tt font
+\newcommand\bftt{%
+	\fontfamily{lmtt}% %% you need to switch to latin modern typewriter text, which is similar to computer modern typewriter text (source: http://tex.stackexchange.com/questions/11498/bold-typewriter-type-fonts)
+	\fontseries{bx}%
+	%\fontshape{n}%
+	\selectfont%
+}
+
 \setlength\parskip{2pt plus2pt minus2pt}
 \setlength\parindent{0pt}
 
@@ -75,6 +86,7 @@
 
 \newcommand\UserSpecificInputStyle{\color{Purple}\sltt}
 \newcommand\ListingEmphasis{\sltt}
+\newcommand\ListingStrongEmphasis{\bftt\color{Sepia}}
 \newcommand\UserTyping{\color{Green}}
 \newcommand\KeyboardInput{\color{Green}}
 
@@ -95,6 +107,8 @@
 	moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
 	% emphasis in listing
 	moredelim=[is][\ListingEmphasis]{//|}{//|},
+	% stronger emphasis in listing
+	moredelim=[is][\ListingStrongEmphasis]{//*}{//*},
 	% what the user should type in
 	moredelim=[is][\UserTyping]{//[}{//]},
 	% keyboard inputs, surround with <> so you have <///[[RETURN///]]>, for example
@@ -153,7 +167,7 @@ This guide aims to show the reader how to
 \end{enumerate}
 
 \section{Syntax Guide}
-In order to avoid any confusion, here's a brief overview of the special syntax used in this document:
+In order to avoid any confusion, here's a brief overview of the special syntax---all of which is assumed to be rendered in \texttt{typewriter text}---used in this document:
 \begin{table}[!h]\centering
 \caption{\label{tab:syntax} Syntax guide}\smallskip
 \begin{tabu}{@{} p{0.35\textwidth} l p{0.35\textwidth} @{}}
@@ -165,6 +179,8 @@ green text & \lstinline{//[n//]} & exact user input, often found in a large bloc
 bracketed green text & \lstinline{<//[[RETURN//]]>} & special key input \\
 red hook right arrow & \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}} & line continuation character (i.e.\ in actual input/output, there is no linebreak) \\
 plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should be entered by the user \\
+slanted text & \lstinline{//|emphasized//|} & emphasized text \\
+bold sepia text & \lstinline{//*Emphasized!//*} & strongly emphasized text (generally to highlight a letter that you might otherwise miss) \\
 \bottomrule
 \end{tabu}
 \end{table}
@@ -586,9 +602,22 @@ First, listing groups is similar to listing users; it's simply
 \begin{lstlisting}
 # cat /etc/group
 \end{lstlisting}
-The main groups we care about are \lstinline{users}, \lstinline{rfkill}, and \lstinline{wheel}.
+The main groups we care about are \lstinline{users}, \lstinline{rfkill}, and \lstinline{wheel}.  Granting membership to \lstinline{users} is a nice thing to do, \lstinline{rfkill} lets you turn off RF devices (e.g.\ Bluetooth and wifi), and \lstinline{wheel} is the typical name for the administrative group.
 
 \subsection{Configuring \lstinline{sudo}}
+\lstinline{sudo} grants the temporary privilege of \lstinline{root} to a non-root user and logs all commands and failed access attempts.  Working as a non-root user ensures that you're less likely to cause damage to your system through a mistake or a bug in a command you execute.
+
+When you run a command through \lstinline{sudo}, you'll receive the following warning:
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+We trust you have received the usual lecture from the local System
+Administrator. It usually boils down to these three things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.
+\end{lstlisting}
+It's a message that bears repeating.
+
 \begin{enumerate}
 \item Install\footnote{source: \url{https://wiki.archlinux.org/index.php/sudo}} \lstinline{sudo}:
 \begin{lstlisting}
@@ -609,33 +638,151 @@ Sudoers entry:
         ALL
 \end{lstlisting}
 
+\item The configuration file for \lstinline{sudo}, \lstinline{/etc/sudoers}, should \EMPH{always} be edited with \lstinline{visudo} because it locks the \lstinline{sudoers} file, saves edits to a temporary file, and checks the syntax before copying it back to \lstinline{/etc/sudoers}.
 
+Unfortunately but unsurprisingly, the default editor for \lstinline{visudo} is \lstinline{vi}.  You can fix this problem with
+\begin{lstlisting}
+# EDITOR=nano visudo
+\end{lstlisting}
+which will open \lstinline{sudoers} for editing.
+
+Uncomment the line
+\begin{lstlisting}
+# %wheel ALL=(ALL) ALL
+\end{lstlisting}
+to give members of the \lstinline{wheel} group \lstinline{sudo} privileges.
+
+To permanently set \lstinline{nano} as your \lstinline{visudo} \lstinline{EDITOR}, add the following to your \lstinline{sudoers} file:
+\begin{lstlisting}
+# Reset environment by default
+Defaults env_reset
+# set default EDITOR to nano, and do not allow visudo to use EDITOR/VISUAL
+Defaults editor=/usr/bin/nano, !env_editor
+\end{lstlisting}
+
+Upon saving and exiting, running \lstinline{# sudo -ll} again produces
+\begin{lstlisting}[basicstyle=\ttfamily\small]
+User root may run the following commands on alarmpi:
+
+Sudoers entry:
+    RunAsUsers: ALL
+    Commands:
+        ALL
+Sudoers entry:
+    RunAsUsers: ALL
+    Commands:
+        ALL
+\end{lstlisting}
+which isn't necessarily what you'd expect.
 
 \end{enumerate}
+
+At this point, I highly encourage you to log out as \lstinline{root} and log in as the user you created.  Because we set \lstinline{bash} as our default terminal, lines will now start with \lstinline{$} instead of \lstinline{#}.
+
+%% it's probably also a good idea to give root a new password
+
+\subsubsection{Disabling \lstinline{root} Login}
+
+\url{https://wiki.archlinux.org/index.php/sudo#Disable_root_login} (actually detail how to do this in here)
 
 \subsection{Enabling SSH Access}
 
 \begin{enumerate}
 \item Now that we have an internet connection, we should sync our repo database and upgrade our system:
 \begin{lstlisting}
-# pacman -Syu
+$ sudo pacman -Syu
 \end{lstlisting}
 which should ensure that \lstinline{openssh} is up-to-date.
 
-\item (\lstinline{systemctl} seems to have replaced \lstinline{initscripts}, so ignore any advice that says you need to look at your \lstinline{/etc/rc.conf} file, which you probably don't even have!)
-
-Check \lstinline{systemctl} to see if an SSH d\ae mon is running\footnote{Trust me, you don't want to leave off the \lstinline{| grep -i 'ssh'}---it's a bit much to read through.  Also, the \lstinline{-i} isn't strictly necessary in this case, but it gives you a case-insensitive search, which is nice.}:
+\item Check \lstinline{systemctl}\footnote{\lstinline{systemctl} seems to have replaced \lstinline{initscripts}, so ignore any advice that says you need to look at your \lstinline{/etc/rc.conf} file, which you probably don't even have!} to see if an SSH d\ae mon is running\footnote{Trust me, you don't want to leave off the \lstinline{| grep -i 'ssh'}---it's a bit much to read through.  Also, the \lstinline{-i} isn't strictly necessary in this case, but it gives you a case-insensitive search, which is nice.}:
 \begin{lstlisting}
-# systemctl list-units | grep -i 'ssh'
+$ systemctl list-units | grep -i 'ssh'
 \end{lstlisting}
 which for me produced
 \begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
 sshd.service        loaded active running  OpenSSH Daemon
 \end{lstlisting}
 
+%%%% nevermind, this isn't working well for some reason -- it doesn't want to play nicely with \lstinline{~/sshd_config} no matter what
+%%% Ok, I'm getting sick of typing (and mistyping) \lstinline all the time.  It turns out I can also do \lstMakeShortInline{} to define a character that lets me just do <char><lstinline stuff><char> instead, which is nice.  Also, \lstDeleteShortInline{} undoes it.  Way cool!
+%\lstMakeShortInline{+}
+
+\item Edit the SSH d\ae mon configuration file\footnote{If you omit \lstinline{sudo}, you won't have the necessary permissions to edit the file.  In case you forget (as I did upon doing this myelf), you can save it elsewhere (e.g. \lstinline{./sshd_config}, and if you're unsure what your current working directory is, run \lstinline{$ pwd}), exit \lstinline{nano}, and run \lstinline{$ sudo mv ./sshd_config /etc/ssh/sshd_config}.}:
+\begin{lstlisting}
+$ sudo nano /etc/ssh/ssh//*d//*_config
+\end{lstlisting}
+and add the lines
+\begin{lstlisting}
+AllowGroups users wheel
+PermitRootLogin no
+\end{lstlisting}
+If you want a custom greeting, add the line
+\begin{lstlisting}
+Banner /etc/issue
+\end{lstlisting}
+and edit the file \lstinline{/etc/issue} (you'll need root permissions).
+
+%\item (optional) To change the name of your Raspberry Pi, which is set to \lstinline{alarmpi} by default, you'll need to edit two files\footnote{source: \url{http://elinux.org/ArchLinux_Install_Guide\#Initial_Installation}}.
+%\begin{enumerate}
+%\item Edit \lstinline{/etc/hostname}:
+%\begin{lstlisting}
+%$ sudo nano /etc/hostname
+%\end{lstlisting}
+%and change \lstinline{alarmpi} to \lstinline{<//<new name>//>}.
+%
+%\item Edit \lstinline{/etc/hosts}:
+%\begin{lstlisting}
+%$ sudo nano /etc/hosts
+%\end{lstlisting}
+%and change the line
+%\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+%127.0.0.1  localhost.localdomain localhost
+%\end{lstlisting}
+%to
+%\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+%127.0.0.1  localhost.localdomain localhost <//<new name>//>
+%\end{lstlisting}
+%\end{enumerate}
+
+\item (optional) To change the name of your Raspberry Pi\footnote{source: \url{https://wiki.archlinux.org/index.php/Network_configuration\#Set_the_hostname}}:
+
+\begin{lstlisting}
+$ sudo hostnamectl set-hostname <//<new name>//>
+\end{lstlisting}
 
 \end{enumerate}
 
+That's it!  You can now connect to your Pi\footnote{If you've changed your Pi's hostname but previously connected to it through SSH before doing so, the computer through which you're trying to connect will likely have a line in \lstinline{$HOME/.ssh/known_hosts} that prevents you from connecting through the new name. (source: \url{https://bbs.archlinux.org/viewtopic.php?id=168055})  In my case, running \lstinline{$ dscacheutil -flushcache} fixed the issue.} by running the following on a computer connected to the same network as your Pi\footnote{I'm assuming you're connecting through port 22}:
+\begin{lstlisting}
+$ ssh -p 22 <//<username>//>@<//<hostname>//>
+\end{lstlisting}
+where \lstinline{<//<hostname>//>} is \lstinline{alarmpi} by default or \lstinline{<//<new name>//>} if you elected to change it.
+
+Alternately, if you know your Pi's IP address, you can connect to it with\footnote{Again, assuming that you're going through port 22.}
+\begin{lstlisting}
+$ ssh -p 22 <//<username>//>@<//<IP address>//>
+\end{lstlisting}
+
+You can supposedly make your life more convenient with an \lstinline{ssh_config} file.  If that sounds appealing, see \href{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}{Simplify your life with an SSH config file}\footnote{\url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}}.
+
+%% see https://wiki.archlinux.org/index.php/Secure_Shell#Managing_the_sshd_daemon
+%\begin{enumerate}
+%\item In order to set the IP address, in your \lstinline{sshd_config} file, uncomment the line
+%\begin{lstlisting}
+%#ListenAddress 0.0.0.0
+%\end{lstlisting}
+%and change it to
+%\begin{lstlisting}
+%
+%\end{lstlisting}
+%\end{enumerate} 
+
+%\end{enumerate}
+
+
+
+\subsubsection{SSH Keys Versus Password Logins}
+Using SSH keys is more secure\footnote{source: \url{https://wiki.archlinux.org/index.php/SSH_Keys}}, but for now, it's easier to go with password logins.
 
 
 %%followed by a table that looks something like
