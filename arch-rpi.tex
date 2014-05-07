@@ -85,6 +85,7 @@
 \definecolor{codeframe}{HTML}{CCCCCC}
 
 \newcommand\UserSpecificInputStyle{\color{Purple}\sltt}
+\newcommand\UserSpecificEnvironmentVariables{\color{DarkBlue}\sltt}
 \newcommand\ListingEmphasis{\sltt}
 \newcommand\ListingStrongEmphasis{\bftt\color{Sepia}}
 \newcommand\UserTyping{\color{Green}}
@@ -105,6 +106,8 @@
 	aboveskip=6pt,
 	% delimits user-specific inputs -- should be surrounded by <> so you have <//<user-specific input>//>
 	moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
+	% user-specific environment variables
+	moredelim=[is][\UserSpecificEnvironmentVariables]{+//<}{>//+},
 	% emphasis in listing
 	moredelim=[is][\ListingEmphasis]{//|}{//|},
 	% stronger emphasis in listing
@@ -155,12 +158,13 @@ This guide aims to show the reader how to
 \item enable SSH access,
 \item install GNU Compiler Collection (GCC), % 4.9+ because of C++11 support (see: http://gcc.gnu.org/projects/cxx1y.html)
 \item install Python 3,
+\item install Git,
+\item install GNU Emacs 24+,
+\item set up Emacs,
 \item install WiringPi library,
 \item install pigpio library,
 \item install RPi.GPIO library,
 %\item install GNU nano, %% nano is already installed
-\item install GNU Emacs 24+,
-\item set up Emacs,
 \item \ldots
 \item ??? install watchdog d\ae mon -- reboots Pi on failure \url{http://pi.gadgetoid.com/article/who-watches-the-watcher}
 \item ??? install Lynx (text-based web browser)
@@ -832,6 +836,25 @@ $ sudo pacman -S emacs
 \end{lstlisting}
 
 Be forewarned: Emacs is quite large---over \SI{330}{\mebi\bytes} when I installed it---but it's worth it.
+
+\subsubsection{Emacs Setup}
+Emacs is a very personal thing, but my general recommendation is to try
+\begin{lstlisting}
+$ mkdir ~/elisp
+$ mkdir ~/.emacs.d
+\end{lstlisting}
+through SSH, and then, in another terminal, try
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+<+//<remote-comp>//+>: <+//<cwd>//+> <+//<remote username>//+>$ scp -P 22 ~/.emacs <//<username>//>@<//<hostname>//>:~/
+<+//<remote-comp>//+>: <+//<cwd>//+> <+//<remote username>//+>$ -scp -r -P 22 ~/elisp/* <//<username>//>@<//<hostname>//>:~/elisp/
+<+//<remote-comp>//+>: <+//<cwd>//+> <+//<remote username>//+>$ -scp -r -P 22 ~/.emacs.d/* <//<username>//>@<//<hostname>//>:~/.emacs.d/
+\end{lstlisting}
+which in my case looks like
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize]
+matlockmbp:~ matlock$ scp -P 22 ~/.emacs matlock@archrpi:~/
+matlockmbp:~ matlock$ scp -r -P 22 ~/elisp/* matlock@archrpi:~/elisp/
+matlockmbp:~ matlock$ scp -r -P 22 ~/.emacs.d/* matlock@archrpi:~/.emacs.d/
+\end{lstlisting}
 
 \section{Miscellaneous Useful Commands}
 
