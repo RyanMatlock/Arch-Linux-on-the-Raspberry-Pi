@@ -765,6 +765,8 @@ $ ssh -p 22 <//<username>//>@<//<IP address>//>
 
 You can supposedly make your life more convenient with an \lstinline{ssh_config} file.  If that sounds appealing, see \href{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}{Simplify your life with an SSH config file}\footnote{\url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}}.
 
+Now we've set up SSH, I'd suggest that's how you connect to your Pi because it's just easier.
+
 %% see https://wiki.archlinux.org/index.php/Secure_Shell#Managing_the_sshd_daemon
 %\begin{enumerate}
 %\item In order to set the IP address, in your \lstinline{sshd_config} file, uncomment the line
@@ -779,21 +781,20 @@ You can supposedly make your life more convenient with an \lstinline{ssh_config}
 
 %\end{enumerate}
 
-
-
 \subsubsection{SSH Keys Versus Password Logins}
 Using SSH keys is more secure\footnote{source: \url{https://wiki.archlinux.org/index.php/SSH_Keys}}, but for now, it's easier to go with password logins.
 
+\subsection{Recommended Software}
 
-%%followed by a table that looks something like
-%%\begin{table}[!h]\ttfamily
-%%\begin{tabu}{@{} l l r r r r l @{}}
-%%Device & Boot & Start & End & Blocks & Id & System \\
-%%/dev/mmcblk0p1 & & 2048 & 186367 & 92160 & c & W95 FAT32 (LBA) \\
-%%/dev/mmcblkp2 & & 186368 & 3667967 & 1740800 & 5 & Extended \\
-%%/dev/mmcblkp5 & & 188416 & 3667967 & 1739776 & 83 & Linux
-%%\end{tabu}
-%%\end{table}
+The following subsections make heavy use of
+\begin{lstlisting}
+$ pacman -S <//<package>//>
+\end{lstlisting}
+
+\subsubsection{Installing the GNU Compiler Collection (GCC)}
+
+
+
 
 \section{Miscellaneous Useful Commands}
 
