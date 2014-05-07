@@ -3,7 +3,7 @@
 \usepackage{booktabs,longtable,tabu} % for nice-looking tables
 \usepackage[binary-units=true]{siunitx} % for units
 \usepackage{listings} % for code
-%\usepackage[grumpy]{gitinfo} % for Git hash (i.e. versioning)
+\usepackage[grumpy]{gitinfo} % for Git hash (i.e. versioning)
 \usepackage{underscore} % so you can use underscores
 \usepackage{pdflscape} % for bill of materials page
 \usepackage{graphicx}
@@ -130,10 +130,9 @@
 
 
 \title{Arch Linux on the Raspberry Pi}
-\author{Ryan Matlock, Magzor Corp.}
+\author{Ryan Matlock, Magzor Corp.\thanks{Last commit: \gittext{\gitAbbrevHash} by \gittext{\gitAuthorName} on \gittext{\gitAuthorIsoDate}}}
 \date{\today}
 \maketitle
-%\footnotetext{Last commit: \gittext{\gitAbbrevHash} by \gittext{\gitAuthorName} on \gittext{\gitAuthorIsoDate}}
 
 \begin{abstract}
 Arch is a Linux distribution built around ``\href{https://wiki.archlinux.org/index.php/The_Arch_Way}{The Arch Way},''\footnote{\url{https://wiki.archlinux.org/index.php/The_Arch_Way}} a philosophy of simplicity, code-correctness, user-centricity, openness, and freedom.  Simplicity lends itself to a minimalist approach, which in turn leads to lower system resource overhead---exactly what one wants in an embedded system.  Code-correctness means that the software is clean, correct, and simple, which implies a greater degree of comprehensibility and predictability, albeit sometimes accompanied with a steeper learning curve.  User-centricity, not to be confused with user-friendliness, manifests itself as giving the user complete control over their %% using a plural pronoun (e.g. they, them, their) with a singular antecdent has a rich history in English going back to at least the 16th century, and it's preferable to using singular masculine pronouns everywhere or coining new singular pronouns
