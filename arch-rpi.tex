@@ -112,7 +112,7 @@
 	% what the user should type in
 	moredelim=[is][\UserTyping]{//[}{//]},
 	% keyboard inputs, surround with <> so you have <///[[RETURN///]]>, for example
-	moredelim=[is][\KeyboardInput]{//[[}{//]]}
+	moredelim=[is][\KeyboardInput]{//[[}{//]]},
 }
 
 %\newenvironment{aside}
@@ -765,8 +765,6 @@ $ ssh -p 22 <//<username>//>@<//<IP address>//>
 
 You can supposedly make your life more convenient with an \lstinline{ssh_config} file.  If that sounds appealing, see \href{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}{Simplify your life with an SSH config file}\footnote{\url{http://nerderati.com/2011/03/simplify-your-life-with-an-ssh-config-file/}}.
 
-Now we've set up SSH, I'd suggest that's how you connect to your Pi because it's just easier.
-
 %% see https://wiki.archlinux.org/index.php/Secure_Shell#Managing_the_sshd_daemon
 %\begin{enumerate}
 %\item In order to set the IP address, in your \lstinline{sshd_config} file, uncomment the line
@@ -784,17 +782,56 @@ Now we've set up SSH, I'd suggest that's how you connect to your Pi because it's
 \subsubsection{SSH Keys Versus Password Logins}
 Using SSH keys is more secure\footnote{source: \url{https://wiki.archlinux.org/index.php/SSH_Keys}}, but for now, it's easier to go with password logins.
 
+\subsection{Making Use of SSH}
+
+Now we've set up SSH, I'd suggest that's how you connect to your Pi because it's just easier.
+
 \subsection{Recommended Software}
 
-The following subsections make heavy use of
-\begin{lstlisting}
-$ pacman -S <//<package>//>
-\end{lstlisting}
+The following subsections make heavy use of Arch's package management system, \lstinline{pacman}.
+%\begin{lstlisting}
+%$ pacman -S <//<package>//>
+%\end{lstlisting}
 
 \subsubsection{Installing the GNU Compiler Collection (GCC)}
 
+Installing \lstinline{gcc} is as simple as
+\begin{lstlisting}
+$ sudo pacman -S gcc
+\end{lstlisting}
 
+\lstinputlisting[language=c,showstringspaces=false,basicstyle=\ttfamily\small]{hello-world.c}
 
+\subsubsection{Installing Python 3}
+
+\begin{lstlisting}
+$ sudo pacman -S python
+\end{lstlisting}
+
+If you also want Python~2, replacing \lstinline{python} with \lstinline{python2} is all you need to do.
+
+To test your Python installation, run
+\begin{lstlisting}
+$ python
+\end{lstlisting}
+you should see something like
+\begin{lstlisting}
+Python 3.4.0 (default, Apr 27 2014, 10:47:09) 
+[GCC 4.8.2 20131219 (prerelease)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+\end{lstlisting}
+Of course, it's more satisfying if you try a hello world, which is just
+\begin{lstlisting}[language=python,showstringspaces=false,basicstyle=\ttfamily]
+>>> print("Hello, world!")
+\end{lstlisting}
+
+\subsubsection{Installing GNU Emacs}
+\begin{lstlisting}
+$ sudo pacman -S emacs
+\end{lstlisting}
+
+Be forewarned: Emacs is quite large---over \SI{330}{\mebi\bytes} when I installed it---but it's worth it.
 
 \section{Miscellaneous Useful Commands}
 
