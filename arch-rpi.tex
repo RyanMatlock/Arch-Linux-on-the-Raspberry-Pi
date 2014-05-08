@@ -147,7 +147,7 @@ Openness and freedom allow for greater control of the system; as Arch Linux's fo
 %\lstinline[backgroundcolor=\color{codebg}]{hi there} %% turns out background coloring of lstinline text is slightly nontrivial
 
 \section{Overview}
-This guide aims to show the reader how to
+This guide aims to show you how to
 \begin{enumerate}
 \item install Arch Linux for Raspberry Pi onto a blank SD card,
 \item expand the root partition to fill the disk,
@@ -168,6 +168,8 @@ This guide aims to show the reader how to
 \item ??? install watchdog d\ae mon -- reboots Pi on failure \url{http://pi.gadgetoid.com/article/who-watches-the-watcher}
 \item ??? install Lynx (text-based web browser)
 \end{enumerate}
+
+For now, I'm assuming you're familiar with basic *nix commands like \lstinline{ls}, \lstinline{cd}, \lstinline{mkdir}, etc, although eventually I'd like to create a small appendix to get novices up to speed.
 
 \section{Syntax Guide}
 In order to avoid any confusion, here's a brief overview of the special syntax---all of which is assumed to be rendered in \texttt{typewriter text}---used in this document:
@@ -608,7 +610,7 @@ First, listing groups is similar to listing users; it's simply
 \end{lstlisting}
 The main groups we care about are \lstinline{users}, \lstinline{rfkill}, and \lstinline{wheel}.  Granting membership to \lstinline{users} is a nice thing to do, \lstinline{rfkill} lets you turn off RF devices (e.g.\ Bluetooth and wifi), and \lstinline{wheel} is the typical name for the administrative group.
 
-\subsection{Configuring \lstinline{sudo}}
+\subsection{Installing and Configuring \lstinline{sudo}}
 \lstinline{sudo} grants the temporary privilege of \lstinline{root} to a non-root user and logs all commands and failed access attempts.  Working as a non-root user ensures that you're less likely to cause damage to your system through a mistake or a bug in a command you execute.
 
 When you run a command through \lstinline{sudo}, you'll receive the following warning:
@@ -791,6 +793,8 @@ Using SSH keys is more secure\footnote{source: \url{https://wiki.archlinux.org/i
 
 Now we've set up SSH, I'd suggest that's how you connect to your Pi because it's just easier.
 
+If you want to figure out how to copy files, see the subsection on Emacs Setup (\hyperref[emacs-setup]{\S~\ref{emacs-setup}}).
+
 \subsection{Recommended Software}
 
 The following subsections make heavy use of Arch's package management system, \lstinline{pacman}.
@@ -805,7 +809,17 @@ Installing \lstinline{gcc} is as simple as
 $ sudo pacman -S gcc
 \end{lstlisting}
 
+To verify your \lstinline{gcc} installation works, type the following into a file named \lstinline{hello-world.c}
+
 \lstinputlisting[language=c,showstringspaces=false,basicstyle=\ttfamily\small]{hello-world.c}
+
+run
+\begin{lstlisting}
+$ gcc hello-world.c -o hello-world.app
+$ ./hello-world.app
+\end{lstlisting}
+
+Congratulations! If you haven't already, you can now add ``C programmer'' to your r\'esum\'e.
 
 \subsubsection{Installing Python 3}
 
@@ -831,14 +845,50 @@ Of course, it's more satisfying if you try a hello world, which is just
 >>> print("Hello, world!")
 \end{lstlisting}
 
+\subsubsection{Installing GNU Make}
+\begin{lstlisting}
+$ sudo pacman -S make
+\end{lstlisting}
+
+\subsubsection{Installing Git}
+\begin{lstlisting}
+$ sudo pacman -S git
+\end{lstlisting}
+
+\subsubsection{Installing WiringPi}
+There doesn't appear to be an Arch Linux ARM-compatible packaged release of WiringPi, so this installation process looks a little different.  First, clone WiringPi using \lstinline{git}\footnote{source: \url{https://projects.drogon.net/raspberry-pi/wiringpi/download-and-install/}}:
+\begin{lstlisting}
+$ git clone git://git.drogon.net/wiringPi
+\end{lstlisting}
+then go into the folder and build the library:
+\begin{lstlisting}
+$ cd wiringPi
+$ ./build
+\end{lstlisting}
+
+(I still need to look up where the installation puts everything to ensure that
+\begin{lstlisting}
+$ rm -r ~/wiringPi
+\end{lstlisting}
+is safe to do, but I have a feeling that because \lstinline{./build} invokes \lstinline{sudo}, everything is put in a place that requires special permission, that is, not your home folder.)
+
+\subsubsection{Installing I2C Tools}
+\begin{lstlisting}
+$ sudo pacman -S i2c-tools
+\end{lstlisting}
+
+Looks like you get Python 2 for free with this.  I'm not sure how you invoke this, but according to Sonny, we need it.
+
 \subsubsection{Installing GNU Emacs}
 \begin{lstlisting}
 $ sudo pacman -S emacs
 \end{lstlisting}
 
-Be forewarned: Emacs is quite large---over \SI{330}{\mebi\bytes} when I installed it---but it's worth it.
+Be forewarned: Emacs is quite large---over \SI{330}{\mebi\byte} when I installed it---but it's worth it.
 
-\subsubsection{Emacs Setup}
+\subsubsection{Emacs Setup\label{emacs-setup}}
+I recommend actually ignoring this section for the time being.
+
 Emacs is a very personal thing, but my general recommendation is to try
 \begin{lstlisting}
 $ mkdir ~/elisp
@@ -858,6 +908,7 @@ matlockmbp:~ matlock$ scp -r -P 22 ~/.emacs.d/* matlock@archrpi:~/.emacs.d/
 \end{lstlisting}
 
 \section{Configuring Arch: The Easy Way}
+Haha, there is no ``easy'' way (yet---I'm working on it).
 
 \section{Miscellaneous Useful Commands}
 
