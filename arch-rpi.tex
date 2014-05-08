@@ -181,9 +181,10 @@ bracketed purple slanted text & \lstinline{<//<username>//>} & something to be e
 green text & \lstinline{//[n//]} & exact user input, often found in a large block of prompts and outputs \\
 bracketed green text & \lstinline{<//[[RETURN//]]>} & special key input \\
 red hook right arrow & \raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}} & line continuation character (i.e.\ in actual input/output, there is no linebreak) \\
-plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should be entered by the user \\
+plain text following \lstinline{$} or \lstinline{#} (shell prompt) & \lstinline{reboot} & text between shell prompt and end of line should    e entered by the user \\
 slanted text & \lstinline{//|emphasized//|} & emphasized text \\
 bold sepia text & \lstinline{//*Emphasized!//*} & strongly emphasized text (generally to highlight a letter that you might otherwise miss) \\
+bracketed dark blue slanted text & \lstinline{<+//<cwd>//+>} & \\
 \bottomrule
 \end{tabu}
 \end{table}
@@ -710,6 +711,7 @@ sshd.service        loaded active running  OpenSSH Daemon
 %%% Ok, I'm getting sick of typing (and mistyping) \lstinline all the time.  It turns out I can also do \lstMakeShortInline{} to define a character that lets me just do <char><lstinline stuff><char> instead, which is nice.  Also, \lstDeleteShortInline{} undoes it.  Way cool!
 %\lstMakeShortInline{+}
 
+%%%%% you can now do \lstinline{~(stuff)} in a footnote if you wrap \lstinline in \scantokens...\relax (see: http://tex.stackexchange.com/questions/175919/pathological-listings-problem-tilde-in-lstinline-in-a-footnote)
 \item Edit the SSH d\ae mon configuration file\footnote{If you omit \lstinline{sudo}, you won't have the necessary permissions to edit the file.  In case you forget (as I did upon doing this myelf), you can save it elsewhere (e.g. \lstinline{./sshd_config}, and if you're unsure what your current working directory is, run \lstinline{$ pwd}), exit \lstinline{nano}, and run \lstinline{$ sudo mv ./sshd_config /etc/ssh/sshd_config}.}:
 \begin{lstlisting}
 $ sudo nano /etc/ssh/ssh//*d//*_config
@@ -854,6 +856,8 @@ matlockmbp:~ matlock$ scp -P 22 ~/.emacs matlock@archrpi:~/
 matlockmbp:~ matlock$ scp -r -P 22 ~/elisp/* matlock@archrpi:~/elisp/
 matlockmbp:~ matlock$ scp -r -P 22 ~/.emacs.d/* matlock@archrpi:~/.emacs.d/
 \end{lstlisting}
+
+\section{Configuring Arch: The Easy Way}
 
 \section{Miscellaneous Useful Commands}
 
