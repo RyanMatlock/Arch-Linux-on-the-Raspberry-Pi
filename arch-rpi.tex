@@ -157,6 +157,7 @@ This guide aims to show you how to
 \item enable SSH access,
 \item install GNU Compiler Collection (GCC), % 4.9+ because of C++11 support (see: http://gcc.gnu.org/projects/cxx1y.html)
 \item install Python 3,
+\item \EMPH{INSTALL IPYTHON} !!!!!! %%% do this!!
 \item install Git,
 \item install GNU Emacs 24+,
 \item set up Emacs,
@@ -196,6 +197,10 @@ bracketed dark blue slanted text & \lstinline{<+//<cwd>//+>} & \\
 \subsection{Installation}
 %\begin{enumerate}
 %\item 
+
+
+%% be more specific about the download
+%% include the Linux and Windows instructions and put them in different subsubsections
 Download the Arch Linux disk image from \url{http://archlinuxarm.org/platforms/armv6/raspberry-pi} and follow the instructions.
 (Note: for Mac OS X\footnote{The \lstinline{bash} terminal is assumed to be used, so user input lines are started with \lstinline{$}.  Later, the \lstinline{tty} prompt of Arch will start user input lines with \lstinline{#}%, although I'm going to go with \lstinline{>} because the \LaTeX\ \lstinline{listings} package treats \lstinline{#} as a comment %% added commenstyle=\ttfamily to lstset, so it's not a problem
 .}, the process is a little different\footnote{source: \url{http://www.embeddedarm.com/support/faqs.php?item=10}}:
@@ -203,10 +208,11 @@ Download the Arch Linux disk image from \url{http://archlinuxarm.org/platforms/a
 \begin{enumerate}
 \item Plug in your SD card and run
 
+%% looks like you need to be more explicit about the meaning of $ and #
 \begin{lstlisting}
 $ diskutil list
 \end{lstlisting}
-
+%% put some styling around the N in diskN
 to find the \lstinline{/dev/diskN} node (e.g. \lstinline{disk3}, which is the \lstinline{sdX} in the linked instructions) on which it's located.
 
 \item Unmount the drive by running
@@ -225,6 +231,7 @@ if successful.
 
 \item Write the Arch image by running
 
+%% /path/to is confusing, as is the *
 \begin{lstlisting}
 $ dd bs=1m if=/path/to/ArchLinuxARM*-rpi.img of=/dev/rdiskN
 \end{lstlisting}
