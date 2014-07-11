@@ -37,6 +37,16 @@
 \newcommand\Emph[1]{\textbf{#1}}
 \newcommand\EMPH[1]{\textbf{\textit{#1}}}
 
+\newenvironment{seriously}{%
+  \begin{center}%
+	\begin{minipage}[c]{2em}\Huge !\end{minipage}%
+	\begin{minipage}[c]{0.75\textwidth}%
+	  \noindent}
+	{%
+	\end{minipage}%
+  \end{center}%
+  \ignorespacesafterend}
+
 \renewcommand{\sfdefault}{phv} % phv is Helvetica
 \urlstyle{sf}
 \hypersetup{%
@@ -916,6 +926,85 @@ matlockmbp:~ matlock$ scp -r -P 22 ~/.emacs.d/* matlock@archrpi:~/.emacs.d/
 
 \section{Configuring Arch: The Easy Way}
 Haha, there is no ``easy'' way (yet---I'm working on it).
+
+\section{Using your newly-configured Arch device}
+
+\subsection{Configuring Git}
+
+\begin{enumerate}
+  \item Tell \lstinline{git} your name\footnote{source: \url{https://help.github.com/articles/set-up-git}} with
+	\begin{lstlisting}
+$ git config --global user.name "<//<your name>//>"
+    \end{lstlisting}
+	and your email address with
+	\begin{lstlisting}
+$ git config --global user.email "<//<your email>//>"
+    \end{lstlisting}
+  \item Generate SSH keys for \lstinline{git}\footnote{source:
+	  \url{https://help.github.com/articles/generating-ssh-keys}}
+	\begin{enumerate}
+	  \item Check if you have SSH keys (you won't yet, but check anyway)
+		\begin{lstlisting}
+$ ls -al ~/.ssh
+        \end{lstlisting}
+		If you actually have something, that's weird.  If you want to do this
+		from scratch, I'd suggest doing something like
+		\begin{lstlisting}
+$ mv ~/.ssh ~/existing-ssh-files
+        \end{lstlisting}
+		and then it's like you're starting fresh, but you don't lose something
+		that you potentially need.
+	  \item Generate a new SSH key
+		\begin{lstlisting}
+$ ssh-keygen -t rsa -C <//<your email address>//>
+        \end{lstlisting}
+		You'll be prompted to enter a passphrase, and because this involves
+		Github and important code, \emph{you should actually choose a good
+		password.}  Seriously.
+	  \begin{seriously}In fact, if you don't have a password management
+		system alredy, I recommend some form of
+		\href{http://keepass.info/}{KeePass}.  As of this writing, my personal
+		computer runs OS X, and I've had absolutely no problems with
+		\href{http://www.keepassx.org/}{KeePassX}.  Better still, I keep my
+		passwords on Dropbox, so they're synced on my phone viewable with
+		KeePass2Android.\end{seriously}
+      \item Add your new key to the \lstinline{ssh-agent}
+		\begin{lstlisting}
+$ eval "$(ssh-agent -s)"
+Agent pid (some number)
+$ ssh-add ~/.ssh/id_rsa
+        \end{lstlisting}
+		\item Now you need to add your SSH key to GitHub.  The way the linked
+		  article recommends doing it is all well and good if you're using your
+		  local machine, but since you're SSH'd into the Pi, things are a
+		  little different.  I recommend
+		  \begin{lstlisting}
+$ cat ~/.ssh/id_rsa.pub
+          \end{lstlisting}
+		  and copying the resulting key text to your clipboard.  The guide
+		  warns that it's important that the key is copied exactly without
+		  extra whitespace or newline characters, so copy from the beginning of
+		  \lstinline{ssh-rsa} to the end of \lstinline{<//<your email>//>}.
+		  From there, go to your GitHub account, click on Account Settings (the
+		  screwdriver and wrench symbol in the upper right), click on SSH Keys
+		  on the left, click Add SSH Key, paste the key into the field, Add
+		  Key, and confirm with your GitHub password.
+		\item Test that this works by entering
+		  \begin{lstlisting}
+$ ssh -T git@github.com		  
+		  \end{lstlisting}
+		  It'll prompt you about connecting despite being unable to establish
+		  the authenticity of github.com, but that's ok.  Type \lstinline{yes}
+		  and you'll see
+		  \begin{lstlisting}
+Hi <//<your GitHub username>//>! You've successfully authenticated, but GitHub does not provide shell access.
+		  \end{lstlisting}
+		  if everything is working.
+		\end{enumerate}
+		Now that everything is set up with Git and GitHub, you're ready to
+		clone a repo and get to work!
+\end{enumerate}
+
 
 \section{Miscellaneous Useful Commands}
 
