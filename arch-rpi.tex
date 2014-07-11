@@ -45,6 +45,7 @@
 	{%
 	\end{minipage}%
   \end{center}%
+  \smallskip%
   \ignorespacesafterend}
 
 \renewcommand{\sfdefault}{phv} % phv is Helvetica
@@ -971,7 +972,7 @@ $ mv ~/.ssh ~/existing-ssh-files
 		that you potentially need.
 	  \item Generate a new SSH key
 		\begin{lstlisting}
-$ ssh-keygen -t rsa -C <//<your email address>//>
+$ ssh-keygen -t rsa -C "<//<your email address>//>"
         \end{lstlisting}
 		You'll be prompted to enter a passphrase, and because this involves
 		Github and important code, \emph{you should actually choose a good
