@@ -31,7 +31,7 @@
 \DeclareSIUnit\bytes{\siwordspace bytes} % for when you want "bytes" spelled out
 
 \sisetup{%
-	digitsep=comma,
+    digitsep=comma,
 }
 
 \newcommand\Emph[1]{\textbf{#1}}
@@ -39,11 +39,11 @@
 
 \newenvironment{seriously}{%
   \begin{center}%
-	\begin{minipage}[c]{2em}\Huge !\end{minipage}%
-	\begin{minipage}[c]{0.75\textwidth}%
-	  \noindent}
-	{%
-	\end{minipage}%
+    \begin{minipage}[c]{2em}\Huge !\end{minipage}%
+    \begin{minipage}[c]{0.75\textwidth}%
+      \noindent}
+    {%
+    \end{minipage}%
   \end{center}%
   \smallskip%
   \ignorespacesafterend}
@@ -51,10 +51,10 @@
 \renewcommand{\sfdefault}{phv} % phv is Helvetica
 \urlstyle{sf}
 \hypersetup{%
-	colorlinks=true,
-	linkcolor=MediumVioletRed, 
-		%blue,
-	urlcolor=Blue,
+    colorlinks=true,
+    linkcolor=MediumVioletRed, 
+        %blue,
+    urlcolor=Blue,
 }
 \newcommand\styledhref[2]{\href{#1}{\sf #2}}
 
@@ -72,18 +72,18 @@
 
 %% define slanted tt font
 \newcommand\sltt{%
-	\fontfamily{cmtt}%
-	\fontseries{m}%
-	\fontshape{sl}%
-	\selectfont%
+    \fontfamily{cmtt}%
+    \fontseries{m}%
+    \fontshape{sl}%
+    \selectfont%
 }
 
 %% define bf tt font
 \newcommand\bftt{%
-	\fontfamily{lmtt}% %% you need to switch to latin modern typewriter text, which is similar to computer modern typewriter text (source: http://tex.stackexchange.com/questions/11498/bold-typewriter-type-fonts)
-	\fontseries{bx}%
-	%\fontshape{n}%
-	\selectfont%
+    \fontfamily{lmtt}% %% you need to switch to latin modern typewriter text, which is similar to computer modern typewriter text (source: http://tex.stackexchange.com/questions/11498/bold-typewriter-type-fonts)
+    \fontseries{bx}%
+    %\fontshape{n}%
+    \selectfont%
 }
 
 \setlength\parskip{2pt plus2pt minus2pt}
@@ -103,39 +103,39 @@
 \newcommand\KeyboardInput{\color{Green}}
 
 \lstset{%
-	backgroundcolor=\color{codebg},
-	%language=bash,
-	frame=single,
-	framesep=2pt,
-	rulecolor=\color{codeframe},
-	%upquote=true, %% the terminal output on the Pi doesn't appear to use upquotes, so why should I?
-	basicstyle=\ttfamily,
-	breaklines=true,
-	postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}},
-	commentstyle=\ttfamily,
-	belowskip=-2pt,
-	aboveskip=6pt,
-	% delimits user-specific inputs -- should be surrounded by <> so you have <//<user-specific input>//>
-	moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
-	% user-specific environment variables
-	moredelim=[is][\UserSpecificEnvironmentVariables]{+//<}{>//+},
-	% emphasis in listing
-	moredelim=[is][\ListingEmphasis]{//|}{//|},
-	% stronger emphasis in listing
-	moredelim=[is][\ListingStrongEmphasis]{//*}{//*},
-	% what the user should type in
-	moredelim=[is][\UserTyping]{//[}{//]},
-	% keyboard inputs, surround with <> so you have <///[[RETURN///]]>, for example
-	moredelim=[is][\KeyboardInput]{//[[}{//]]},
+    backgroundcolor=\color{codebg},
+    %language=bash,
+    frame=single,
+    framesep=2pt,
+    rulecolor=\color{codeframe},
+    %upquote=true, %% the terminal output on the Pi doesn't appear to use upquotes, so why should I?
+    basicstyle=\ttfamily,
+    breaklines=true,
+    postbreak=\raisebox{0ex}[0ex][0ex]{\ensuremath{\color{Red}\hookrightarrow\space}},
+    commentstyle=\ttfamily,
+    belowskip=-2pt,
+    aboveskip=6pt,
+    % delimits user-specific inputs -- should be surrounded by <> so you have <//<user-specific input>//>
+    moredelim=[is][\UserSpecificInputStyle]{//<}{>//}, % [is] means delimiteres are invisible, not nestable
+    % user-specific environment variables
+    moredelim=[is][\UserSpecificEnvironmentVariables]{+//<}{>//+},
+    % emphasis in listing
+    moredelim=[is][\ListingEmphasis]{//|}{//|},
+    % stronger emphasis in listing
+    moredelim=[is][\ListingStrongEmphasis]{//*}{//*},
+    % what the user should type in
+    moredelim=[is][\UserTyping]{//[}{//]},
+    % keyboard inputs, surround with <> so you have <///[[RETURN///]]>, for example
+    moredelim=[is][\KeyboardInput]{//[[}{//]]},
 }
 
 %\newenvironment{aside}
-%	{\begin{mdframed}[style=0,%
-%		leftline=false,rightline=false,leftmargin=2em,%rightmargin=2em,%
-%		innertopmargin=8pt,innerbottommargin=2pt,%
-%		innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.5pt,%
-%		skipabove=2pt,skipbelow=2pt]}
-%	{\end{mdframed}}
+%   {\begin{mdframed}[style=0,%
+%       leftline=false,rightline=false,leftmargin=2em,%rightmargin=2em,%
+%       innertopmargin=8pt,innerbottommargin=2pt,%
+%       innerleftmargin=0pt,innerrightmargin=0pt,linewidth=0.5pt,%
+%       skipabove=2pt,skipbelow=2pt]}
+%   {\end{mdframed}}
 
 \begin{document}
 
@@ -207,9 +207,11 @@ bracketed dark blue slanted text & \lstinline{<+//<cwd>//+>} & \\
 
 \subsection{Installation}
 %\begin{enumerate}
-%\item 
+%\item
+\subsubsection{The (new as of 2014-10-03) Arch Way}
+The instructions are also found at \url{http://archlinuxarm.org/platforms/armv6/raspberry-pi}.
 
-
+\subsubsection{Obsolete method (as of 2014-10-03)}
 %% be more specific about the download
 %% include the Linux and Windows instructions and put them in different subsubsections
 Download the Arch Linux disk image from \url{http://archlinuxarm.org/platforms/armv6/raspberry-pi} and follow the instructions.
@@ -949,76 +951,76 @@ Haha, there is no ``easy'' way (yet---I'm working on it).
 
 \begin{enumerate}
   \item Tell \lstinline{git} your name\footnote{source: \url{https://help.github.com/articles/set-up-git}} with
-	\begin{lstlisting}
+    \begin{lstlisting}
 $ git config --global user.name "<//<your name>//>"
     \end{lstlisting}
-	and your email address with
-	\begin{lstlisting}
+    and your email address with
+    \begin{lstlisting}
 $ git config --global user.email "<//<your email>//>"
     \end{lstlisting}
   \item Generate SSH keys for \lstinline{git}\footnote{source:
-	  \url{https://help.github.com/articles/generating-ssh-keys}}
-	\begin{enumerate}
-	  \item Check if you have SSH keys (you won't yet, but check anyway)
-		\begin{lstlisting}
+      \url{https://help.github.com/articles/generating-ssh-keys}}
+    \begin{enumerate}
+      \item Check if you have SSH keys (you won't yet, but check anyway)
+        \begin{lstlisting}
 $ ls -al ~/.ssh
         \end{lstlisting}
-		If you actually have something, that's weird.  If you want to do this
-		from scratch, I'd suggest doing something like
-		\begin{lstlisting}
+        If you actually have something, that's weird.  If you want to do this
+        from scratch, I'd suggest doing something like
+        \begin{lstlisting}
 $ mv ~/.ssh ~/existing-ssh-files
         \end{lstlisting}
-		and then it's like you're starting fresh, but you don't lose something
-		that you potentially need.
-	  \item Generate a new SSH key
-		\begin{lstlisting}
+        and then it's like you're starting fresh, but you don't lose something
+        that you potentially need.
+      \item Generate a new SSH key
+        \begin{lstlisting}
 $ ssh-keygen -t rsa -C "<//<your email address>//>"
         \end{lstlisting}
-		You'll be prompted to enter a passphrase, and because this involves
-		Github and important code, \emph{you should actually choose a good
-		password.}  Seriously.
-	  \begin{seriously}In fact, if you don't have a password management
-		system alredy, I recommend some form of
-		\href{http://keepass.info/}{KeePass}.  As of this writing, my personal
-		computer runs OS X, and I've had absolutely no problems with
-		\href{http://www.keepassx.org/}{KeePassX}.  Better still, I keep my
-		passwords on Dropbox, so they're synced on my phone viewable with
-		KeePass2Android.\end{seriously}
+        You'll be prompted to enter a passphrase, and because this involves
+        Github and important code, \emph{you should actually choose a good
+        password.}  Seriously.
+      \begin{seriously}In fact, if you don't have a password management
+        system alredy, I recommend some form of
+        \href{http://keepass.info/}{KeePass}.  As of this writing, my personal
+        computer runs OS X, and I've had absolutely no problems with
+        \href{http://www.keepassx.org/}{KeePassX}.  Better still, I keep my
+        passwords on Dropbox, so they're synced on my phone viewable with
+        KeePass2Android.\end{seriously}
       \item Add your new key to the \lstinline{ssh-agent}
-		\begin{lstlisting}
+        \begin{lstlisting}
 $ eval "$(ssh-agent -s)"
 Agent pid (some number)
 $ ssh-add ~/.ssh/id_rsa
         \end{lstlisting}
-		\item Now you need to add your SSH key to GitHub.  The way the linked
-		  article recommends doing it is all well and good if you're using your
-		  local machine, but since you're SSH'd into the Pi, things are a
-		  little different.  I recommend
-		  \begin{lstlisting}
+        \item Now you need to add your SSH key to GitHub.  The way the linked
+          article recommends doing it is all well and good if you're using your
+          local machine, but since you're SSH'd into the Pi, things are a
+          little different.  I recommend
+          \begin{lstlisting}
 $ cat ~/.ssh/id_rsa.pub
           \end{lstlisting}
-		  and copying the resulting key text to your clipboard.  The guide
-		  warns that it's important that the key is copied exactly without
-		  extra whitespace or newline characters, so copy from the beginning of
-		  \lstinline{ssh-rsa} to the end of \lstinline{<//<your email>//>}.
-		  From there, go to your GitHub account, click on Account Settings (the
-		  screwdriver and wrench symbol in the upper right), click on SSH Keys
-		  on the left, click Add SSH Key, paste the key into the field, Add
-		  Key, and confirm with your GitHub password.
-		\item Test that this works by entering
-		  \begin{lstlisting}
-$ ssh -T git@github.com		  
-		  \end{lstlisting}
-		  It'll prompt you about connecting despite being unable to establish
-		  the authenticity of github.com, but that's ok.  Type \lstinline{yes}
-		  and you'll see
-		  \begin{lstlisting}
+          and copying the resulting key text to your clipboard.  The guide
+          warns that it's important that the key is copied exactly without
+          extra whitespace or newline characters, so copy from the beginning of
+          \lstinline{ssh-rsa} to the end of \lstinline{<//<your email>//>}.
+          From there, go to your GitHub account, click on Account Settings (the
+          screwdriver and wrench symbol in the upper right), click on SSH Keys
+          on the left, click Add SSH Key, paste the key into the field, Add
+          Key, and confirm with your GitHub password.
+        \item Test that this works by entering
+          \begin{lstlisting}
+$ ssh -T git@github.com       
+          \end{lstlisting}
+          It'll prompt you about connecting despite being unable to establish
+          the authenticity of github.com, but that's ok.  Type \lstinline{yes}
+          and you'll see
+          \begin{lstlisting}
 Hi <//<your GitHub username>//>! You've successfully authenticated, but GitHub does not provide shell access.
-		  \end{lstlisting}
-		  if everything is working.
-		\end{enumerate}
-		Now that everything is set up with Git and GitHub, you're ready to
-		clone a repo and get to work!
+          \end{lstlisting}
+          if everything is working.
+        \end{enumerate}
+        Now that everything is set up with Git and GitHub, you're ready to
+        clone a repo and get to work!
 \end{enumerate}
 
 
