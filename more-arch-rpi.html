@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>More work for Arch Linux on the Raspberry Pi</title>
-<!-- 2014-11-14 Fri 10:10 -->
+<!-- 2014-11-14 Fri 12:27 -->
 <meta  charset="utf-8">
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Ryan Matlock">
@@ -144,6 +144,11 @@ for the JavaScript code in this tag.
 <li><a href="#sec-1">1. More things to install</a>
 <ul>
 <li><a href="#sec-1-1">1.1. <span class="done DONE">DONE</span> <code>pip</code></a></li>
+<li><a href="#sec-1-2">1.2. <span class="done DONE">DONE</span> <code>wiringpi2</code></a>
+<ul>
+<li><a href="#sec-1-2-1">1.2.1. <span class="done DONE">DONE</span> test it out</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -166,11 +171,101 @@ $ pip -V
 pip 1.5.6 from /usr/lib/python3.4/site-packages (python 3.4)
 </pre>
 </div>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> <span class="done DONE">DONE</span> <code>wiringpi2</code></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+sources:
+<a href="http://raspi.tv/2013/how-to-use-wiringpi2-for-python-on-the-raspberry-pi-in-raspbian">http://raspi.tv/2013/how-to-use-wiringpi2-for-python-on-the-raspberry-pi-in-raspbian</a>
+<a href="https://pypi.python.org/pypi/wiringpi2/">https://pypi.python.org/pypi/wiringpi2/</a>
+</p>
 
 <div class="org-src-container">
 
-<pre class="src src-C++"><span style="color: #228b22;">int</span> <span style="color: #a0522d;">foo</span>;
+<pre class="src src-sh">$ cd ~
+$ git clone https://github.com/Gadgetoid/WiringPi2-Python.git
+$ cd WiringPi2-Python
+$ sudo python3 setup.py install
+<span style="color: #0000ff;">...</span> (lots of text)
+Processing dependencies for <span style="color: #a0522d;">wiringpi2</span>==1.0.10
+Finished processing dependencies for <span style="color: #a0522d;">wiringpi2</span>==1.0.10
 </pre>
+</div>
+</div>
+
+<div id="outline-container-sec-1-2-1" class="outline-4">
+<h4 id="sec-1-2-1"><span class="section-number-4">1.2.1</span> <span class="done DONE">DONE</span> test it out</h4>
+<div class="outline-text-4" id="text-1-2-1">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ python3 basic_wiringPi2_test.py
+...
+ImportError: No module named <span style="color: #8b2252;">'wiringPi2'</span>
+</pre>
+</div>
+<p>
+That's not a good sign. Wait, case.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-sh">$ python3 basic_wiringPi2_test.py 
+Setting up I2C line as 0x0x50
+Writing <span style="color: #8b2252;">'a'</span> (0x0x61) to 17
+Data successfully written (I think)
+</pre>
+</div>
+<p>
+So you need to make a few changes to your code, which currently looks like
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #8b2252;">"""</span>
+<span style="color: #8b2252;">basic_wiringPi2_test.py</span>
+
+<span style="color: #8b2252;">Let's see how easy it is to use wiringpi2 with Python3.</span>
+<span style="color: #8b2252;">"""</span>
+
+<span style="color: #a020f0;">import</span> wiringpi2 <span style="color: #a020f0;">as</span> wp
+
+<span style="color: #a0522d;">PI_ID</span> = <span style="color: #483d8b;">int</span>(<span style="color: #8b2252;">'0x50'</span>, 16)
+<span style="color: #a0522d;">TARGET_ID</span> = <span style="color: #483d8b;">int</span>(<span style="color: #8b2252;">'0x11'</span>, 16)
+
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Setting up I2C line as 0x{}"</span>.<span style="color: #483d8b;">format</span>(<span style="color: #483d8b;">hex</span>(PI_ID)))
+wp.wiringPiI2CSetup(PI_ID)
+
+<span style="color: #a0522d;">data</span> = <span style="color: #8b2252;">'a'</span>
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Writing '{}' (0x{}) to {}"</span>.<span style="color: #483d8b;">format</span>(data, <span style="color: #483d8b;">hex</span>(<span style="color: #483d8b;">ord</span>(data)), TARGET_ID))
+wp.wiringPiI2CWrite(TARGET_ID, <span style="color: #483d8b;">ord</span>(data))
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Data successfully written (I think)"</span>)
+</pre>
+</div>
+
+<p>
+Ok, now it's working
+</p>
+<div class="org-src-container">
+
+<pre class="src src-python"><span style="color: #a020f0;">import</span> wiringpi2 <span style="color: #a020f0;">as</span> wp
+
+<span style="color: #a0522d;">TARGET_ID</span> = <span style="color: #483d8b;">int</span>(<span style="color: #8b2252;">'0x11'</span>, 16)
+
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Setting up I2C line as {}"</span>.<span style="color: #483d8b;">format</span>(<span style="color: #483d8b;">hex</span>(PI_ID)))
+<span style="color: #a0522d;">i2c</span> = wp.I2C()
+<span style="color: #a0522d;">dev</span> = i2c.setup(TARGET_ID)
+
+<span style="color: #a0522d;">data</span> = <span style="color: #8b2252;">'a'</span>
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Writing '{}' ({}) to {}"</span>.<span style="color: #483d8b;">format</span>(data, <span style="color: #483d8b;">hex</span>(<span style="color: #483d8b;">ord</span>(data)), <span style="color: #483d8b;">hex</span>(TARGET_ID)))
+i2c.write(dev, <span style="color: #483d8b;">ord</span>(data))
+<span style="color: #a020f0;">print</span>(<span style="color: #8b2252;">"Data successfully written (I think)"</span>)
+</pre>
+</div>
+<p>
+source: <a href="https://github.com/Gadgetoid/WiringPi2-Python/issues/2">https://github.com/Gadgetoid/WiringPi2-Python/issues/2</a>
+</p>
 </div>
 </div>
 </div>
@@ -178,7 +273,7 @@ pip 1.5.6 from /usr/lib/python3.4/site-packages (python 3.4)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Ryan Matlock</p>
-<p class="date">Created: 2014-11-14 Fri 10:10</p>
+<p class="date">Created: 2014-11-14 Fri 12:27</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

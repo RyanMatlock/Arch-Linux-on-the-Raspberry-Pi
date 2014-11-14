@@ -5,7 +5,6 @@
 (started [2014-11-14 Fri])
 
 * More things to install
-
 ** DONE =pip=
 #+BEGIN_SRC sh
 $ sudo pacman -S python-pip
@@ -13,7 +12,7 @@ $ pip -V
 pip 1.5.6 from /usr/lib/python3.4/site-packages (python 3.4)
 #+END_SRC
 
-** TODO =wiringPi2=
+** DONE =wiringpi2=
 sources:
 http://raspi.tv/2013/how-to-use-wiringpi2-for-python-on-the-raspberry-pi-in-raspbian
 https://pypi.python.org/pypi/wiringpi2/
@@ -27,3 +26,56 @@ $ sudo python3 setup.py install
 Processing dependencies for wiringpi2==1.0.10
 Finished processing dependencies for wiringpi2==1.0.10
 #+END_SRC
+
+*** DONE test it out
+#+BEGIN_SRC sh
+$ python3 basic_wiringPi2_test.py
+...
+ImportError: No module named 'wiringPi2'
+#+END_SRC
+That's not a good sign. Wait, case.
+
+#+BEGIN_SRC sh
+$ python3 basic_wiringPi2_test.py 
+Setting up I2C line as 0x0x50
+Writing 'a' (0x0x61) to 17
+Data successfully written (I think)
+#+END_SRC
+So you need to make a few changes to your code, which currently looks like
+#+BEGIN_SRC python
+"""
+basic_wiringPi2_test.py
+
+Let's see how easy it is to use wiringpi2 with Python3.
+"""
+
+import wiringpi2 as wp
+
+PI_ID = int('0x50', 16)
+TARGET_ID = int('0x11', 16)
+
+print("Setting up I2C line as 0x{}".format(hex(PI_ID)))
+wp.wiringPiI2CSetup(PI_ID)
+
+data = 'a'
+print("Writing '{}' (0x{}) to {}".format(data, hex(ord(data)), TARGET_ID))
+wp.wiringPiI2CWrite(TARGET_ID, ord(data))
+print("Data successfully written (I think)")
+#+END_SRC
+
+Ok, now it's working
+#+BEGIN_SRC python
+import wiringpi2 as wp
+
+TARGET_ID = int('0x11', 16)
+
+print("Setting up I2C line as {}".format(hex(PI_ID)))
+i2c = wp.I2C()
+dev = i2c.setup(TARGET_ID)
+
+data = 'a'
+print("Writing '{}' ({}) to {}".format(data, hex(ord(data)), hex(TARGET_ID)))
+i2c.write(dev, ord(data))
+print("Data successfully written (I think)")
+#+END_SRC
+source: https://github.com/Gadgetoid/WiringPi2-Python/issues/2
