@@ -79,3 +79,15 @@ i2c.write(dev, ord(data))
 print("Data successfully written (I think)")
 #+END_SRC
 source: https://github.com/Gadgetoid/WiringPi2-Python/issues/2
+** DONE =python-3.4.1+=
+I read somewhere[fn:py3_4_0-bug: http://npyscreen.readthedocs.org/introduction.html on [2014-11-17 Mon]] that there was a bug with
+Python 3.4.0, so I recommend running
+#+BEGIN_SRC sh
+$ sudo pacman -S python
+$ python --version
+$ python3 --version
+#+END_SRC
+and ensure that the result is =Python 3.4.1= or newer (as of this writing, it's
+actually =Python 3.4.2=, I can't imagine than number decrementing, so
+yeah). Note that as of [2010-10-18 Mon] (a.k.a. prehistory), =python= on Arch
+Linux is =python3=.
