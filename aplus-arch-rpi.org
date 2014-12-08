@@ -339,6 +339,11 @@ https://help.github.com/articles/generating-ssh-keys/
 ** Expand the root partition
 Hopefully you've set things up so it's /really/ obvious when you're =root= now.
 
+Quick note: I'm doing this with a 4GB drive, so your exact numbers will
+probably vary slightly or even dramatically, depending on the vendor and size
+of your drive. Note that a larger drive will make for longer =dd= archive
+times (I think---I'm at least 95% sure this is true).
+
 1. Log in as =root=:
    #+BEGIN_SRC sh
    $ sudo su
@@ -419,4 +424,204 @@ Hopefully you've set things up so it's /really/ obvious when you're =root= now.
    Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
    #+END_SRC
 
+8. We haven't written our changes yet, so let's make sure everything looks
+   right by entering command =p=:
+   #+BEGIN_SRC plain
+   Command (m for help): p
+   Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disklabel type: dos
+   Disk identifier: 0x417ee54b
 
+   Device         Boot  Start     End Sectors  Size Id Type
+   /dev/mmcblk0p1        2048  186367  184320   90M  c W95 FAT32 (LBA)
+   /dev/mmcblk0p2      186368 7744511 7558144  3.6G  5 Extended
+   /dev/mmcblk0p5      188416 7744511 7556096  3.6G 83 Linux
+   #+END_SRC
+   Looks good to me!
+
+9. Write our changes with command =w=:
+   #+BEGIN_SRC plain
+   Command (m for help): w
+   The partition table has been altered.
+   Calling ioctl() to re-read partition table.
+   Re-reading the partition table failed.: Device or resource busy
+
+   The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+   #+END_SRC
+   (I think this is actually ok.)
+
+10. Reboot the system:
+    #+BEGIN_SRC sh
+    # reboot
+    #+END_SRC
+
+11. Wait for the Pi to reboot, SSH back into it, and log back in as root:
+    #+BEGIN_SRC sh
+    $ sudo su
+    #+END_SRC
+
+12. Run =df= to see what the filesystem looks like now:
+    #+BEGIN_SRC sh
+    # df   
+    Filesystem     1K-blocks    Used Available Use% Mounted on
+    /dev/root        1679632 1276676    299584  81% /
+    devtmpfs           88424       0     88424   0% /dev
+    tmpfs              92644       0     92644   0% /dev/shm
+    tmpfs              92644     280     92364   1% /run
+    tmpfs              92644       0     92644   0% /sys/fs/cgroup
+    tmpfs              92644       0     92644   0% /tmp
+    /dev/mmcblk0p1     91962   25948     66014  29% /boot
+    tmpfs              18532       0     18532   0% /run/user/1000
+    #+END_SRC
+    81% used! That's a lot! (Thanks, Emacs.)
+
+13. Use =resize2fs= to finally apply our changes:
+    #+BEGIN_SRC sh
+    # resize2fs /dev/mmcblk0p5
+    resize2fs 1.42.12 (29-Aug-2014)
+    Filesystem at /dev/mmcblk0p5 is mounted on /; on-line resizing required
+    old_desc_blocks = 1, new_desc_blocks = 1
+    The filesystem on /dev/mmcblk0p5 is now 944512 (4k) blocks long.
+    #+END_SRC
+
+14. Just out of curiosity, let's recheck the filesystem with =df=:
+    #+BEGIN_SRC sh
+    # df
+    Filesystem     1K-blocks    Used Available Use% Mounted on
+    /dev/root        3688608 1277524   2229996  37% /
+    devtmpfs           88424       0     88424   0% /dev
+    tmpfs              92644       0     92644   0% /dev/shm
+    tmpfs              92644     280     92364   1% /run
+    tmpfs              92644       0     92644   0% /sys/fs/cgroup
+    tmpfs              92644       0     92644   0% /tmp
+    /dev/mmcblk0p1     91962   25948     66014  29% /boot
+    tmpfs              18532       0     18532   0% /run/user/1000
+    #+END_SRC
+    37% is somewhat more reasonable.
+
+** Make sure your important variables are set
+E.g. =PATH=, =PYTHONPATH=, etc. My bash configuration takes care of this.
+
+** Install GNU Make
+#+BEGIN_SRC sh
+$ sudo pacman -S make
+#+END_SRC
+
+** Install =tree= (because trees are pretty) and Midnight Commander
+#+BEGIN_SRC sh
+$ sudo pacman -S tree
+$ sudo pacman -S mc
+#+END_SRC
+
+** Install =ack= because it's incredibly helpful
+#+BEGIN_SRC sh
+$ sudo pacman -S ack
+#+END_SRC
+
+** Install =gcc=
+#+BEGIN_SRC sh
+$ sudo pacman -S gcc
+#+END_SRC
+
+** Install =wiringPi=
+#+BEGIN_SRC sh
+$ git clone git://git.drogon.net/wiringPi
+$ cd wiringPi
+$ ./build
+#+END_SRC
+
+** Install =i2ctools=
+#+BEGIN_SRC sh
+$ sudo pacman -S i2c-tools
+#+END_SRC
+and verify that it works with
+#+BEGIN_SRC sh
+$ sudo i2cdetect -y 1
+Error: Could not open file `/dev/i2c-1' or `/dev/i2c/1': No such file or directory
+#+END_SRC
+That's not ideal.
+
+Try this:
+#+BEGIN_SRC sh
+$ sudo modprobe i2c-dev
+$ sudo modprobe i2c-bcm2708
+$ sudo i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --   
+#+END_SRC
+It looks like it's working now, although that =UU= at =0x1b= is new to me.
+
+** Set up the clock (this actually matters)[fn:source-clock-info: From http://raspberrypi.stackexchange.com/questions/266/how-can-i-keep-system-time and my earlier notes]
+Install =ntp= and start(?) =ntpd= (which I guess is the =ntp= daemon):
+#+BEGIN_SRC sh
+$ sudo pacman -S ntp
+$ sudo ntpd -qg
+#+END_SRC
+(Actually, I already had =ntp= installed, so the second line should have worked
+already.)
+
+Still, you want this to work on startup. Try:
+#+BEGIN_SRC sh
+$ systemctl list-units | grep ntp
+#+END_SRC
+And you'll probably see nothing. Do
+#+BEGIN_SRC sh
+$ sudo systemctl enable ntpd
+#+END_SRC
+and everything should work as expected.
+
+To set up the timezone, first check where it's currently set with
+#+BEGIN_SRC sh
+$ timedatectl status
+#+END_SRC
+and we see that it's set for Denver. To fix that, do:
+#+BEGIN_SRC sh
+$ sudo timedatectl set-timezone $(timedatectl list-timezones | grep <your city>)
+#+END_SRC
+
+** Install =wiringpi2=
+#+BEGIN_SRC sh
+$ cd ~
+$ git clone git@github.com:Gadgetoid/WiringPi2-Python.git
+$ cd WiringPi2-Python
+$ sudo python setup.py install
+#+END_SRC
+
+
+(I originally tried to set this up using HTTPS instead of SSH, but because I
+haven't set up the clock yet, the device is still stuck in the late 60s/early
+70s, so the SSL key was showing up as not yet valid.)
+
+Actually, the whole thing didn't work because I didn't have the clock set up
+yet. In fact, I had to =rm -r= the whole thing and re-clone it because the
+=setup.py= script didn't like the pre-1980 timestamps.
+
+When you see
+#+BEGIN_SRC plain
+Installed /usr/lib/python3.4/site-packages/wiringpi2-1.0.10-py3.4-linux-armv6l.egg
+Processing dependencies for wiringpi2==1.0.10
+Finished processing dependencies for wiringpi2==1.0.10
+#+END_SRC
+you're probably fine, but let's test it out anyway:
+#+BEGIN_SRC sh
+$ python
+Python 3.4.2 (default, Oct  9 2014, 07:20:34) 
+[GCC 4.8.2 20131219 (prerelease)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import wiringpi2
+>>> 
+#+END_SRC
+No =ImportError= means we're good to go.
+
+And I think that's all there is to it for now. Let's back it up again and get
+cracking.

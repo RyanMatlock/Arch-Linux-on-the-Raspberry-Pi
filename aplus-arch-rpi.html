@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Arch Linux for the Raspberry Pi A+</title>
-<!-- 2014-12-08 Mon 11:01 -->
+<!-- 2014-12-08 Mon 12:15 -->
 <meta  charset="utf-8">
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Ryan Matlock">
@@ -177,6 +177,15 @@ for the JavaScript code in this tag.
 <li><a href="#sec-3-4">3.4. Add your GitHub SSH keys</a></li>
 <li><a href="#sec-3-5">3.5. Set up bash how you like it</a></li>
 <li><a href="#sec-3-6">3.6. Expand the root partition</a></li>
+<li><a href="#sec-3-7">3.7. Make sure your important variables are set</a></li>
+<li><a href="#sec-3-8">3.8. Install GNU Make</a></li>
+<li><a href="#sec-3-9">3.9. Install <code>tree</code> (because trees are pretty) and Midnight Commander</a></li>
+<li><a href="#sec-3-10">3.10. Install <code>ack</code> because it's incredibly helpful</a></li>
+<li><a href="#sec-3-11">3.11. Install <code>gcc</code></a></li>
+<li><a href="#sec-3-12">3.12. Install <code>wiringPi</code></a></li>
+<li><a href="#sec-3-13">3.13. Install <code>i2ctools</code></a></li>
+<li><a href="#sec-3-14">3.14. Set up the clock (this actually matters)</a></li>
+<li><a href="#sec-3-15">3.15. Install <code>wiringpi2</code></a></li>
 </ul>
 </li>
 </ul>
@@ -790,6 +799,13 @@ installed.
 Hopefully you've set things up so it's <i>really</i> obvious when you're <code>root</code> now.
 </p>
 
+<p>
+Quick note: I'm doing this with a 4GB drive, so your exact numbers will
+probably vary slightly or even dramatically, depending on the vendor and size
+of your drive. Note that a larger drive will make for longer <code>dd</code> archive
+times (I think&#x2014;I'm at least 95% sure this is true).
+</p>
+
 <ol class="org-ol">
 <li>Log in as <code>root</code>:
 <div class="org-src-container">
@@ -891,7 +907,342 @@ Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
 </pre>
 </div>
 </li>
+
+<li>We haven't written our changes yet, so let's make sure everything looks
+right by entering command <code>p</code>:
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): p
+Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x417ee54b
+
+Device         Boot  Start     End Sectors  Size Id Type
+/dev/mmcblk0p1        2048  186367  184320   90M  c W95 FAT32 (LBA)
+/dev/mmcblk0p2      186368 7744511 7558144  3.6G  5 Extended
+/dev/mmcblk0p5      188416 7744511 7556096  3.6G 83 Linux
+</pre>
+</div>
+<p>
+Looks good to me!
+</p>
+</li>
+
+<li>Write our changes with command <code>w</code>:
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): w
+The partition table has been altered.
+Calling ioctl() to re-read partition table.
+Re-reading the partition table failed.: Device or resource busy
+
+The kernel still uses the old table. The new table will be used at the next reboot or after you run partprobe(8) or kpartx(8).
+</pre>
+</div>
+<p>
+(I think this is actually ok.)
+</p>
+</li>
+
+<li>Reboot the system:
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">reboot</span>
+</pre>
+</div>
+</li>
+
+<li>Wait for the Pi to reboot, SSH back into it, and log back in as root:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo su
+</pre>
+</div>
+</li>
+
+<li>Run <code>df</code> to see what the filesystem looks like now:
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">df   </span>
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/root        1679632 1276676    299584  81% /
+devtmpfs           88424       0     88424   0% /dev
+tmpfs              92644       0     92644   0% /dev/shm
+tmpfs              92644     280     92364   1% /run
+tmpfs              92644       0     92644   0% /sys/fs/cgroup
+tmpfs              92644       0     92644   0% /tmp
+/dev/mmcblk0p1     91962   25948     66014  29% /boot
+tmpfs              18532       0     18532   0% /run/user/1000
+</pre>
+</div>
+<p>
+81% used! That's a lot! (Thanks, Emacs.)
+</p>
+</li>
+
+<li>Use <code>resize2fs</code> to finally apply our changes:
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">resize2fs /dev/mmcblk0p5</span>
+resize2fs 1.42.12 (29-Aug-2014)
+Filesystem at /dev/mmcblk0p5 is mounted on /; on-line resizing required
+old_desc_blocks = 1, new_desc_blocks = 1
+The filesystem on /dev/mmcblk0p5 is now 944512 (4k) blocks long.
+</pre>
+</div>
+</li>
+
+<li>Just out of curiosity, let's recheck the filesystem with <code>df</code>:
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">df</span>
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/root        3688608 1277524   2229996  37% /
+devtmpfs           88424       0     88424   0% /dev
+tmpfs              92644       0     92644   0% /dev/shm
+tmpfs              92644     280     92364   1% /run
+tmpfs              92644       0     92644   0% /sys/fs/cgroup
+tmpfs              92644       0     92644   0% /tmp
+/dev/mmcblk0p1     91962   25948     66014  29% /boot
+tmpfs              18532       0     18532   0% /run/user/1000
+</pre>
+</div>
+<p>
+37% is somewhat more reasonable.
+</p>
+</li>
 </ol>
+</div>
+</div>
+
+<div id="outline-container-sec-3-7" class="outline-3">
+<h3 id="sec-3-7"><span class="section-number-3">3.7</span> Make sure your important variables are set</h3>
+<div class="outline-text-3" id="text-3-7">
+<p>
+E.g. <code>PATH</code>, <code>PYTHONPATH</code>, etc. My bash configuration takes care of this.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-8" class="outline-3">
+<h3 id="sec-3-8"><span class="section-number-3">3.8</span> Install GNU Make</h3>
+<div class="outline-text-3" id="text-3-8">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S make
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-9" class="outline-3">
+<h3 id="sec-3-9"><span class="section-number-3">3.9</span> Install <code>tree</code> (because trees are pretty) and Midnight Commander</h3>
+<div class="outline-text-3" id="text-3-9">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S tree
+$ sudo pacman -S mc
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-10" class="outline-3">
+<h3 id="sec-3-10"><span class="section-number-3">3.10</span> Install <code>ack</code> because it's incredibly helpful</h3>
+<div class="outline-text-3" id="text-3-10">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S ack
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-11" class="outline-3">
+<h3 id="sec-3-11"><span class="section-number-3">3.11</span> Install <code>gcc</code></h3>
+<div class="outline-text-3" id="text-3-11">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S gcc
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-12" class="outline-3">
+<h3 id="sec-3-12"><span class="section-number-3">3.12</span> Install <code>wiringPi</code></h3>
+<div class="outline-text-3" id="text-3-12">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ git clone git://git.drogon.net/wiringPi
+$ cd wiringPi
+$ ./build
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-13" class="outline-3">
+<h3 id="sec-3-13"><span class="section-number-3">3.13</span> Install <code>i2ctools</code></h3>
+<div class="outline-text-3" id="text-3-13">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S i2c-tools
+</pre>
+</div>
+<p>
+and verify that it works with
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo i2cdetect -y 1
+Error: Could not open file <span style="color: #ff00ff;">`/dev/i2c-1' or `</span>/dev/i2c/1<span style="color: #8b2252;">': No such file or directory</span>
+</pre>
+</div>
+<p>
+That's not ideal.
+</p>
+
+<p>
+Try this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo modprobe i2c-dev
+$ sudo modprobe i2c-bcm2708
+$ sudo i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- UU -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --
+</pre>
+</div>
+<p>
+It looks like it's working now, although that <code>UU</code> at <code>0x1b</code> is new to me.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-14" class="outline-3">
+<h3 id="sec-3-14"><span class="section-number-3">3.14</span> Set up the clock (this actually matters)<sup><a id="fnr.7" name="fnr.7" class="footref" href="#fn.7">7</a></sup></h3>
+<div class="outline-text-3" id="text-3-14">
+<p>
+Install <code>ntp</code> and start(?) <code>ntpd</code> (which I guess is the <code>ntp</code> daemon):
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S ntp
+$ sudo ntpd -qg
+</pre>
+</div>
+<p>
+(Actually, I already had <code>ntp</code> installed, so the second line should have worked
+already.)
+</p>
+
+<p>
+Still, you want this to work on startup. Try:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ systemctl list-units | grep ntp
+</pre>
+</div>
+<p>
+And you'll probably see nothing. Do
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo systemctl enable ntpd
+</pre>
+</div>
+<p>
+and everything should work as expected.
+</p>
+
+<p>
+To set up the timezone, first check where it's currently set with
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ timedatectl status
+</pre>
+</div>
+<p>
+and we see that it's set for Denver. To fix that, do:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo timedatectl set-timezone $(<span style="color: #ff00ff;">timedatectl</span> list-timezones | grep &lt;your city&gt;)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-15" class="outline-3">
+<h3 id="sec-3-15"><span class="section-number-3">3.15</span> Install <code>wiringpi2</code></h3>
+<div class="outline-text-3" id="text-3-15">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ cd ~
+$ git clone git@github.com:Gadgetoid/WiringPi2-Python.git
+$ cd WiringPi2-Python
+$ sudo python setup.py install
+</pre>
+</div>
+
+
+<p>
+(I originally tried to set this up using HTTPS instead of SSH, but because I
+haven't set up the clock yet, the device is still stuck in the late 60s/early
+70s, so the SSL key was showing up as not yet valid.)
+</p>
+
+<p>
+Actually, the whole thing didn't work because I didn't have the clock set up
+yet. In fact, I had to <code>rm -r</code> the whole thing and re-clone it because the
+<code>setup.py</code> script didn't like the pre-1980 timestamps.
+</p>
+
+<p>
+When you see
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">Installed /usr/lib/python3.4/site-packages/wiringpi2-1.0.10-py3.4-linux-armv6l.egg
+Processing dependencies for wiringpi2==1.0.10
+Finished processing dependencies for wiringpi2==1.0.10
+</pre>
+</div>
+<p>
+you're probably fine, but let's test it out anyway:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ python
+Python 3.4.2 (default, Oct  9 2014, 07:20:34) 
+[GCC 4.8.2 20131219 (prerelease)] on linux
+Type <span style="color: #8b2252;">"help"</span>, <span style="color: #8b2252;">"copyright"</span>, <span style="color: #8b2252;">"credits"</span> or <span style="color: #8b2252;">"license"</span> for more information.
+&gt;&gt;&gt; import wiringpi2
+&gt;&gt;&gt;
+</pre>
+</div>
+<p>
+No <code>ImportError</code> means we're good to go.
+</p>
+
+<p>
+And I think that's all there is to it for now. Let's back it up again and get
+cracking.
+</p>
 </div>
 </div>
 </div>
@@ -918,12 +1269,14 @@ Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
 <div class="footdef"><sup><a id="fn.6" name="fn.6" class="footnum" href="#fnr.6">6</a></sup> <p><code>#</code> means <code>root</code>, <code>$</code> means some
 user</p></div>
 
+<div class="footdef"><sup><a id="fn.7" name="fn.7" class="footnum" href="#fnr.7">7</a></sup> <p>From <a href="http://raspberrypi.stackexchange.com/questions/266/how-can-i-keep-system-time">http://raspberrypi.stackexchange.com/questions/266/how-can-i-keep-system-time</a> and my earlier notes</p></div>
+
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Ryan Matlock</p>
-<p class="date">Created: 2014-12-08 Mon 11:01</p>
+<p class="date">Created: 2014-12-08 Mon 12:15</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
