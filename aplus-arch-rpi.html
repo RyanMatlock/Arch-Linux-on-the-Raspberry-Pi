@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Arch Linux for the Raspberry Pi A+</title>
-<!-- 2014-12-07 Sun 20:04 -->
+<!-- 2014-12-08 Mon 11:01 -->
 <meta  charset="utf-8">
 <meta  name="generator" content="Org-mode">
 <meta  name="author" content="Ryan Matlock">
@@ -141,16 +141,191 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#sec-1">1. Creating the SD Card</a></li>
+<li><a href="#sec-1">1. Creating the SD Card</a>
+<ul>
+<li><a href="#sec-1-1">1.1. A fork in the road</a>
+<ul>
+<li><a href="#sec-1-1-1">1.1.1. The easy way</a></li>
+</ul>
+</li>
+<li><a href="#sec-1-2">1.2. The instructions per the Arch Linux ARM folks</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. Getting everything up and running</a>
+<ul>
+<li><a href="#sec-2-1">2.1. Turning it on</a></li>
+<li><a href="#sec-2-2">2.2. Wireless networking</a></li>
+<li><a href="#sec-2-3">2.3. Add a user</a></li>
+<li><a href="#sec-2-4">2.4. It's time to update Arch</a></li>
+<li><a href="#sec-2-5">2.5. Install <code>sudo</code></a></li>
+<li><a href="#sec-2-6">2.6. Install <code>emacs</code></a></li>
+<li><a href="#sec-2-7">2.7. Configure <code>sudo</code></a>
+<ul>
+<li><a href="#sec-2-7-1">2.7.1. Disabling <code>root</code> login</a></li>
+</ul>
+</li>
+<li><a href="#sec-2-8">2.8. Enable SSH access</a></li>
+<li><a href="#sec-2-9">2.9. Change the hostname (optional, but recommended)</a></li>
+<li><a href="#sec-2-10">2.10. SSH issues</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. Further necessary configuration</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Install <code>git</code></a></li>
+<li><a href="#sec-3-2">3.2. Install <code>python</code> and useful related dependencies</a></li>
+<li><a href="#sec-3-3">3.3. A note</a></li>
+<li><a href="#sec-3-4">3.4. Add your GitHub SSH keys</a></li>
+<li><a href="#sec-3-5">3.5. Set up bash how you like it</a></li>
+<li><a href="#sec-3-6">3.6. Expand the root partition</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </nav>
 
 <div id="outline-container-sec-1" class="outline-2">
-<h2 id="sec-1"><span class="section-number-2">1</span> Creating the SD Card<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup></h2>
+<h2 id="sec-1"><span class="section-number-2">1</span> Creating the SD Card</h2>
 <div class="outline-text-2" id="text-1">
+</div><div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> A fork in the road</h3>
+<div class="outline-text-3" id="text-1-1">
 <p>
-Replace &lt;sdX&gt; in the following instructions with the device name for the SD card
+The instructions below are great if you've got a working Linux box and some
+time to kill, but because that's not always the case. Someone somewhere on the
+internet suggested grabbing the most recent Arch Linux ARM image (from
+<span class="timestamp-wrapper"><span class="timestamp">[2014-06-22 Sun]</span></span>, which can be found at
+<a href="http://downloads.raspberrypi.org/arch/images/arch-2014-06-22/">http://downloads.raspberrypi.org/arch/images/arch-2014-06-22/</a>), write it do a
+disk with <code>dd</code> the old fashioned way, and run
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -Syu
+</pre>
+</div>
+<p>
+to bring it up to date. This sounds like a reasonable method to me.
+</p>
+</div>
+
+<div id="outline-container-sec-1-1-1" class="outline-4">
+<h4 id="sec-1-1-1"><span class="section-number-4">1.1.1</span> The easy way<sup><a id="fnr.1" name="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
+<div class="outline-text-4" id="text-1-1-1">
+<ol class="org-ol">
+<li>Download the <span class="timestamp-wrapper"><span class="timestamp">[2014-06-22 Sun]</span></span> Arch Linux ARM image linked above to somewhere
+convenient like <code>~/Downloads/ArchLinuxARM-2014.06-rpi.img.zip</code>.
+</li>
+
+<li>Unzip the archive
+<div class="org-src-container">
+
+<pre class="src src-sh">$ unzip ~/Downloads/ArchLinuxARM-2014.06-rpi.img.zip -d ~/Downloads
+</pre>
+</div>
+<p>
+(You can omit the <code>-d ~/Downloads</code> flag if you don't mind extracting to your
+current working directory, or you can <code>cd ~/Downloads</code> before this step.)
+</p>
+</li>
+
+<li>Insert a micro SD card, and try to find its mount
+point<sup><a id="fnr.2" name="fnr.2" class="footref" href="#fn.2">2</a></sup>:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ diskutil list
+</pre>
+</div>
+<p>
+and you'll see something like
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">/dev/disk0
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *750.2 GB   disk0
+   1:                        EFI EFI                     209.7 MB   disk0s1
+   2:                  Apple_HFS Foo                     500.1 GB   disk0s2
+   3:                  Apple_HFS Bar                     249.6 GB   disk0s3
+/dev/disk1
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:      GUID_partition_scheme                        *1.0 TB     disk1
+   1:                        EFI EFI                     209.7 MB   disk1s1
+   2:                  Apple_HFS Baz                     499.6 GB   disk1s2
+   3:                 Apple_Boot Recovery HD             650.0 MB   disk1s3
+   4:       Microsoft Basic Data Qux                     250.2 GB   disk1s4
+   5:       Microsoft Basic Data Blah                    249.6 GB   disk1s5
+/dev/disk2
+   #:                       TYPE NAME                    SIZE       IDENTIFIER
+   0:     FDisk_partition_scheme                        *4.0 GB     disk2
+   1:             Windows_FAT_32 NO NAME                 94.4 MB    disk2s1
+   2:                      Linux                         3.9 GB     disk2s5
+</pre>
+</div>
+<p>
+You want the root of the one that's clearly an SD card&#x2014;in this case,
+<code>/dev/disk2</code>.<sup><a id="fnr.3" name="fnr.3" class="footref" href="#fn.3">3</a></sup>
+</p>
+</li>
+
+<li>Unmount the micro SD card:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ diskutil unmountDisk /dev/disk2
+</pre>
+</div>
+<p>
+Note that in your case, the disk number maybe be different!
+</p>
+</li>
+
+<li>Write the image to the file:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo dd <span style="color: #a0522d;">bs</span>=1m <span style="color: #a0522d;">if</span>=~/Downloads/ArchLinuxARM-2014.06-rpi.img <span style="color: #a0522d;">of</span>=/dev/rdisk2
+</pre>
+</div>
+<p>
+(That <code>bs=1m</code> line is pretty important, and on OS X, the <code>m</code> is in fact
+lowercase.)
+</p>
+
+<p>
+This will take some time, but on OS X (and maybe Linux?), hitting CTRL-t
+will show you that something is happening, e.g.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">load: 1.72  cmd: dd 28927 uninterruptible 0.00u 0.19s
+210+0 records in
+209+0 records out
+219152384 bytes transferred in 45.639970 secs (4801764 bytes/sec)
+</pre>
+</div>
+<p>
+In my case, the process took almost 7 minutes.
+</p>
+</li>
+
+<li>Unmount the disk again:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ diskutil unmountDisk /dev/disk2
+</pre>
+</div>
+</li>
+
+<li>Put it in the A+, and you're (sort of) on your way!
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> The instructions per the Arch Linux ARM folks<sup><a id="fnr.4" name="fnr.4" class="footref" href="#fn.4">4</a></sup></h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Replace <code>&lt;sdX&gt;</code> in the following instructions with the device name for the SD card
 as it appears on your computer.
 </p>
 
@@ -173,48 +348,582 @@ as it appears on your computer.
 press ENTER to accept the default first sector, then type <code>+100M</code> for the
 last sector.
 </li>
-</ol>
+<li>Type <code>t</code>, then <code>c</code> to set the first partition to type W95 FAT32 (LBA).
+</li>
+<li>Type <code>n</code>, then <code>p</code> for primary, <code>2</code> for the second partition on the
+drive, and then press ENTER twice to accept the default first and last
+sector.
+</li>
+<li>Write the partition table and exit by typing <code>w</code>.
 </li>
 </ol>
-<p>
-Type t, then c to set the first partition to type W95 FAT32 (LBA).
-Type n, then p for primary, 2 for the second partition on the drive, and then
-press ENTER twice to accept the default first and last sector.
-Write the partition table and exit by typing w.
-Create and mount the FAT filesystem:
-mkfs.vfat /dev/&lt;sdX&gt;1
-mkdir boot
-mount /dev/&lt;sdX&gt;1 boot
-Create and mount the ext4 filesystem:
-mkfs.ext4 /dev/&lt;sdX&gt;2
-mkdir root
-mount /dev/&lt;sdX&gt;2 root
-Download and extract the root filesystem (as root, not via sudo):
-wget <a href="http://archlinuxarm.org/os/ArchLinuxARM-rpi-latest.tar.gz">http://archlinuxarm.org/os/ArchLinuxARM-rpi-latest.tar.gz</a>
-bsdtar -xpf ArchLinuxARM-rpi-latest.tar.gz -C root
-sync
-Move boot files to the first partition:
-mv root/boot/* boot
-Unmount the two partitions:
-umount boot root
-Insert the SD card into the Raspberry Pi, connect ethernet, and apply 5V power.
-Use the serial console or SSH to the IP address given to the board by your
+</li>
+
+<li>Create and mount the FAT filesystem:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ mkfs.vfat /dev/&lt;sdX&gt;1
+$ mkdir boot
+$ mount /dev/&lt;sdX&gt;1 boot
+</pre>
+</div>
+</li>
+
+<li>Create and mount the ext4 filesystem:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ mkfs.ext4 /dev/&lt;sdX&gt;2
+$ mkdir root
+$ mount /dev/&lt;sdX&gt;2 root
+</pre>
+</div>
+</li>
+
+<li>Download and extract the root filesystem (as root, not via sudo):
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-latest.tar.gz</span>
+<span style="color: #b22222;"># </span><span style="color: #b22222;">bsdtar -xpf ArchLinuxARM-rpi-latest.tar.gz -C root</span>
+<span style="color: #b22222;"># </span><span style="color: #b22222;">sync</span>
+</pre>
+</div>
+</li>
+
+<li>Move boot files to the first partition:<sup><a id="fnr.5" name="fnr.5" class="footref" href="#fn.5">5</a></sup>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ mv root/boot/* boot
+</pre>
+</div>
+</li>
+
+<li>Unmount the two partitions:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ umount boot root
+</pre>
+</div>
+</li>
+
+<li>Insert the SD card into the Raspberry Pi, connect ethernet, and apply 5V
+power.
+</li>
+
+<li>Use the serial console or SSH to the IP address given to the board by your
 router. The default root password is 'root'.
+</li>
+</ol>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Getting everything up and running</h2>
+<div class="outline-text-2" id="text-2">
+</div><div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Turning it on</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+You'll want a powered USB hub, a wired USB keyboard (I had problems with my USB
+transceiver-based Microsoft Sculpt, but no problems with my old Apple wired
+keyboard), and a USB wifi dongle (I've always had good luck with the Edimax
+ones&#x2014;they're ubiquitious and therefore well supported).
 </p>
+
+<p>
+The login/password is <code>root</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Wireless networking</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+If you're using the Edimax wifi dongle, you shouldn't have any issues. Just
+check that it's connected with<sup><a id="fnr.6" name="fnr.6" class="footref" href="#fn.6">6</a></sup>
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">dmesg | grep usbcore</span>
+</pre>
+</div>
+<p>
+or
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">dmesg | grep rt18192cu</span>
+</pre>
+</div>
+<p>
+and hope you get results. If/when you do,
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">cd /etc/netctl</span>
+<span style="color: #b22222;"># </span><span style="color: #b22222;">cp examples/wireless-wpa &lt;name&gt;</span>
+</pre>
+</div>
+<p>
+Don't get too fancy with <code>&lt;name&gt;</code>&#x2014;I had trouble with <code>matlock.home</code>, but not
+with <code>home</code>.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Add a user</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+Might as well make yourself a member of <code>wheel</code> (this will come up later).
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> It's time to update Arch</h3>
+<div class="outline-text-3" id="text-2-4">
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">pacman -Syu</span>
+</pre>
+</div>
+<p>
+I couldn't even install <code>sudo</code> without this, so it's pretty important. Anyway,
+just say yes to everything (probably). It'll take awhile, but it'll also fix
+tha nasty bash bug (shellshock?) among other things. In my case, there were 103
+things that needed updating, which required downloading, unpacking, etc., so
+yeah, it took quite awhile. (Don't be alarmed if the screen turns off&#x2014;it's
+just fallen asleep, so press a key to wake it up if you'd like.)
+</p>
+
+<p>
+That whole process took somewhere between 30 minutes and an hours, I think.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Install <code>sudo</code></h3>
+<div class="outline-text-3" id="text-2-5">
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">pacman -S sudo</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Install <code>emacs</code></h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+Because trying to find stuff in <code>nano</code> is terrible.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">pacman -S emacs</span>
+</pre>
+</div>
+<p>
+Ok, admittedly, 300+MB is a lot, especially when I haven't even expanded the
+filesystem yet, but I just can't wrap my mind around <code>vim</code> (nor do I especially
+want to).
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-7" class="outline-3">
+<h3 id="sec-2-7"><span class="section-number-3">2.7</span> Configure <code>sudo</code></h3>
+<div class="outline-text-3" id="text-2-7">
+<p>
+You <b>must</b> use <code>visudo</code> to edit the configuration file for <code>sudo</code>, which lives
+at <code>/etc/sudoers</code>. Set <code>emacs</code> as the <code>visudo</code> editor:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">EDITOR=emacs visudo</span>
+</pre>
+</div>
+
+<p>
+To do this permanently, add these lines to the bottom of <code>/etc/sudoers</code>:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain"># reset environment by default
+Defaults env_reset
+# set default EDITOR to emacs, and do not allow visudo to use EDITOR/VISUAL
+Defaults editor=/usr/bin/emacs, !env_editor
+</pre>
+</div>
+<p>
+Despite what <a href="https://wiki.archlinux.org/index.php/sudo#Defaults_Skeleton">https://wiki.archlinux.org/index.php/sudo#Defaults_Skeleton</a> says,
+it looks like the <code>!env_editor</code>, as well as a new line saying <code>Defaults
+!env_editor</code> causes <code>visudo</code> to complain of a syntax error, so I guess you'll
+just have to ignore that for now.
+</p>
+
+<p>
+Now for the really important stuff: remember how you added yourself to the
+group <code>wheel</code> when you made your user account? <code>wheel</code> is generally taken to be
+the admin group. Find and uncomment the line
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain"># %wheel ALL=(ALL) ALL
+</pre>
+</div>
+<p>
+to give <code>wheel</code> members sudo privileges.
+</p>
+
+<p>
+Run
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">sudo -ll</span>
+</pre>
+</div>
+<p>
+to verify that everything looks right.
+</p>
+
+<p>
+At this point, you should log out of <code>root</code> and log back in as <code>&lt;user&gt;</code>. As a
+result, the terminal prompt will be represented by <code>$</code> instead of <code>#</code>.
+</p>
+</div>
+
+<div id="outline-container-sec-2-7-1" class="outline-4">
+<h4 id="sec-2-7-1"><span class="section-number-4">2.7.1</span> Disabling <code>root</code> login</h4>
+<div class="outline-text-4" id="text-2-7-1">
+<p>
+<del>This is pretty important, but I think you'll do it in a bit over SSH.</del> No,
+just do this now.  See
+<a href="https://wiki.archlinux.org/index.php/sudo#Disable_root_login">https://wiki.archlinux.org/index.php/sudo#Disable_root_login</a>.
+</p>
+
+<p>
+Since you're now logged in as a user, we'll have to use <code>sudo</code> (and make sure
+you do this as a user instead of <code>root</code> to ensure you haven't messed anything
+up!!).
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo passwd -l root
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-8" class="outline-3">
+<h3 id="sec-2-8"><span class="section-number-3">2.8</span> Enable SSH access</h3>
+<div class="outline-text-3" id="text-2-8">
+<p>
+Check <code>systemctl</code> to see if an SSH daemon is running:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ systemctl list-units | grep -i <span style="color: #8b2252;">'ssh'</span>
+sshd.service      loaded active running  OpenSSH Daemon
+</pre>
+</div>
+<p>
+(That second line is the output I got, which shows that yes, an SSH daemon is
+running.)
+</p>
+
+<p>
+Edit the SSH daemon config file with:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo emacs /etc/ssh/sshd_config
+</pre>
+</div>
+<p>
+and add the lines
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">AllowGroups users wheel
+PermitRootLogin no
+
+# enable custom greeting
+Banner /etc/issue
+</pre>
+</div>
+<p>
+and then edit <code>/etc/issue</code> to your custom greeting:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo emacs /etc/issue
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2-9" class="outline-3">
+<h3 id="sec-2-9"><span class="section-number-3">2.9</span> Change the hostname (optional, but recommended)</h3>
+<div class="outline-text-3" id="text-2-9">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo hostnamectl set-hostname &lt;new_hostname&gt;
+</pre>
+</div>
+
+<p>
+(I think you can also do this by editing <del><code>/etc/hosts</code> and</del> <code>/etc/hostname</code>, but
+using <code>hostnamectl</code> seems like the right way to do it.)
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2-10" class="outline-3">
+<h3 id="sec-2-10"><span class="section-number-3">2.10</span> SSH issues</h3>
+<div class="outline-text-3" id="text-2-10">
+<p>
+At home, I had a problem with SSHing in like this:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ ssh &lt;me&gt;@&lt;hostname&gt;
+</pre>
+</div>
+<p>
+(we'll just say <code>foo@bar</code> now), so I went over to the Pi and tried:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-sh">$ ip a
+</pre>
+</div>
+<p>
+and saw a line that looked like
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">inet 10.0.1.&lt;###&gt;/&lt;###&gt; ...
+</pre>
+</div>
+<p>
+and found that I could SSH in using
+</p>
+<div class="org-src-container">
+
+<pre class="src src-plain">$ ssh foo@10.0.1.&lt;###&gt;
+</pre>
+</div>
+<p>
+At work this doesn't seem to be a problem, and it probably just means I need to
+configure my home network properly.
+</p>
+
+<p>
+In any case, let's switch over to using the Pi through SSH.
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Further necessary configuration</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Install <code>git</code></h3>
+<div class="outline-text-3" id="text-3-1">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S git
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Install <code>python</code> and useful related dependencies</h3>
+<div class="outline-text-3" id="text-3-2">
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo pacman -S python
+$ sudo pacman -S python-setuptools
+$ sudo pacman -S python-pip
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> A note</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+At this point I'm going to archive this image because I have not yet expanded
+the drive to fill the partition. This could be handy later as there's less to
+update, and I have important stuff like <code>sudo</code>, <code>emacs</code>, <code>git</code>, and <code>python</code>
+installed.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-4" class="outline-3">
+<h3 id="sec-3-4"><span class="section-number-3">3.4</span> Add your GitHub SSH keys</h3>
+<div class="outline-text-3" id="text-3-4">
+<p>
+<a href="https://help.github.com/articles/generating-ssh-keys/">https://help.github.com/articles/generating-ssh-keys/</a>
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-3-5" class="outline-3">
+<h3 id="sec-3-5"><span class="section-number-3">3.5</span> Set up bash how you like it</h3>
+</div>
+
+<div id="outline-container-sec-3-6" class="outline-3">
+<h3 id="sec-3-6"><span class="section-number-3">3.6</span> Expand the root partition</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+Hopefully you've set things up so it's <i>really</i> obvious when you're <code>root</code> now.
+</p>
+
+<ol class="org-ol">
+<li>Log in as <code>root</code>:
+<div class="org-src-container">
+
+<pre class="src src-sh">$ sudo su
+</pre>
+</div>
+</li>
+
+<li>Run <code>fdisk</code>:
+<div class="org-src-container">
+
+<pre class="src src-sh"><span style="color: #b22222;"># </span><span style="color: #b22222;">fdisk /dev/mmcblk0</span>
+</pre>
+</div>
+</li>
+
+<li>Print the partition table by entering command <code>p</code>:
+<div class="org-src-container">
+
+<pre class="src src-plain">Welcome to fdisk (util-linux 2.25.2).
+Changes will remain in memory only, until you decide to write them.
+Be careful before using the write command.
+
+
+Command (m for help): p
+Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+Units: sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 512 bytes / 512 bytes
+Disklabel type: dos
+Disk identifier: 0x417ee54b
+
+Device         Boot  Start     End Sectors  Size Id Type
+/dev/mmcblk0p1        2048  186367  184320   90M  c W95 FAT32 (LBA)
+/dev/mmcblk0p2      186368 3667967 3481600  1.7G  5 Extended
+/dev/mmcblk0p5      188416 3667967 3479552  1.7G 83 Linux
+</pre>
+</div>
+</li>
+
+<li>Delete partition 2 with command <code>d</code>, then selection <code>2</code>:
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): d
+Partition number (1,2,5, default 5): 2
+
+Partition 2 has been deleted.
+</pre>
+</div>
+</li>
+
+<li>Recreate the extended partition. Add a new partition with command <code>n</code>, then
+selection <code>e</code>, then number <code>2</code>, then using the default selection at the next
+two prompts by pressing <code>&lt;ENTER&gt;</code> for each:
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): n
+Partition type
+   p   primary (1 primary, 0 extended, 3 free)
+   e   extended (container for logical partitions)
+Select (default p): e
+Partition number (2-4, default 2): 2
+First sector (186368-7744511, default 186368): 
+Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511): 
+
+Created a new partition 2 of type 'Extended' and of size 3.6 GiB.
+</pre>
+</div>
+</li>
+
+<li>Delete the root partition with command <code>d</code>, then selection <code>5</code>.
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): d   
+Partition number (1,2,5, default 5): 5
+
+Partition 5 has been deleted.
+</pre>
+</div>
+</li>
+
+<li>Recreate the root partition following a similar process to creating the
+extended partition. Add a new partition with command <code>n</code>, then selection
+<code>l</code>, then <code>&lt;ENTER&gt;</code> for the next two prompts:
+<div class="org-src-container">
+
+<pre class="src src-plain">Command (m for help): n
+Partition type
+   p   primary (1 primary, 1 extended, 2 free)
+   l   logical (numbered from 5)
+Select (default p): l
+
+Adding logical partition 5
+First sector (188416-7744511, default 188416): 
+Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511): 
+
+Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
+</pre>
+</div>
+</li>
+</ol>
+</div>
 </div>
 </div>
 <div id="footnotes">
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p><a href="http://archlinuxarm.org/platforms/armv6/raspberry-pi">http://archlinuxarm.org/platforms/armv6/raspberry-pi</a> on <span class="timestamp-wrapper"><span class="timestamp">[2014-12-07 Sun]</span></span></p></div>
+<div class="footdef"><sup><a id="fn.1" name="fn.1" class="footnum" href="#fnr.1">1</a></sup> <p>Done on a MacBook Pro running OS 10.9.5. There are probably a million ways to do this, but here's mine.</p></div>
+
+<div class="footdef"><sup><a id="fn.2" name="fn.2" class="footnum" href="#fnr.2">2</a></sup> <p>This is a little different on Linux. From
+   what I recall, on elementary OS (an Ubuntu derivative), it's probably going
+   to be somewhere like <code>/media/&lt;device_name&gt;</code>, although I may be mistaken&#x2014;I
+   mostly do this sort of thing in OS X.</p></div>
+
+<div class="footdef"><sup><a id="fn.3" name="fn.3" class="footnum" href="#fnr.3">3</a></sup> <p>In OS X, at least, what you <i>really</i> want is
+   <code>/dev/rdisk2</code> when you're doing th writing. It's the raw disk, and it's
+   <i>much</i> faster</p></div>
+
+<div class="footdef"><sup><a id="fn.4" name="fn.4" class="footnum" href="#fnr.4">4</a></sup> <p><a href="http://archlinuxarm.org/platforms/armv6/raspberry-pi">http://archlinuxarm.org/platforms/armv6/raspberry-pi</a> on <span class="timestamp-wrapper"><span class="timestamp">[2014-12-07 Sun]</span></span>. These instructions seem to change often enough that it seems prudent to record them verbatim here.</p></div>
+
+<div class="footdef"><sup><a id="fn.5" name="fn.5" class="footnum" href="#fnr.5">5</a></sup> <p>I'm
+   unclear whether or not this is as root or the user</p></div>
+
+<div class="footdef"><sup><a id="fn.6" name="fn.6" class="footnum" href="#fnr.6">6</a></sup> <p><code>#</code> means <code>root</code>, <code>$</code> means some
+user</p></div>
 
 
 </div>
 </div></div>
 <div id="postamble" class="status">
 <p class="author">Author: Ryan Matlock</p>
-<p class="date">Created: 2014-12-07 Sun 20:04</p>
+<p class="date">Created: 2014-12-08 Mon 11:01</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.4.1 (<a href="http://orgmode.org">Org</a> mode 8.2.10)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

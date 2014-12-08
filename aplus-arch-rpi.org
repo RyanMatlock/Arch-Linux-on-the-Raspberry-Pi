@@ -1,7 +1,97 @@
 #+TITLE: Arch Linux for the Raspberry Pi A+
 
-* Creating the SD Card[fn:source-sd-card: http://archlinuxarm.org/platforms/armv6/raspberry-pi on [2014-12-07 Sun]]
-Replace <sdX> in the following instructions with the device name for the SD card
+* Creating the SD Card
+** A fork in the road
+The instructions below are great if you've got a working Linux box and some
+time to kill, but because that's not always the case. Someone somewhere on the
+internet suggested grabbing the most recent Arch Linux ARM image (from
+[2014-06-22 Sun], which can be found at
+http://downloads.raspberrypi.org/arch/images/arch-2014-06-22/), write it do a
+disk with =dd= the old fashioned way, and run
+#+BEGIN_SRC sh
+$ sudo pacman -Syu
+#+END_SRC
+to bring it up to date. This sounds like a reasonable method to me.
+
+*** The easy way[fn:easy-way-note: Done on a MacBook Pro running OS 10.9.5. There are probably a million ways to do this, but here's mine.]
+1. Download the [2014-06-22 Sun] Arch Linux ARM image linked above to somewhere
+   convenient like =~/Downloads/ArchLinuxARM-2014.06-rpi.img.zip=.
+
+2. Unzip the archive
+   #+BEGIN_SRC sh
+   $ unzip ~/Downloads/ArchLinuxARM-2014.06-rpi.img.zip -d ~/Downloads
+   #+END_SRC
+   (You can omit the =-d ~/Downloads= flag if you don't mind extracting to your
+   current working directory, or you can =cd ~/Downloads= before this step.)
+
+3. Insert a micro SD card, and try to find its mount
+   point[fn:os-sd-card-mount-point: This is a little different on Linux. From
+   what I recall, on elementary OS (an Ubuntu derivative), it's probably going
+   to be somewhere like =/media/<device_name>=, although I may be mistaken---I
+   mostly do this sort of thing in OS X.]:
+   #+BEGIN_SRC sh
+   $ diskutil list
+   #+END_SRC
+   and you'll see something like
+   #+BEGIN_SRC plain
+   /dev/disk0
+      #:                       TYPE NAME                    SIZE       IDENTIFIER
+      0:      GUID_partition_scheme                        *750.2 GB   disk0
+      1:                        EFI EFI                     209.7 MB   disk0s1
+      2:                  Apple_HFS Foo                     500.1 GB   disk0s2
+      3:                  Apple_HFS Bar                     249.6 GB   disk0s3
+   /dev/disk1
+      #:                       TYPE NAME                    SIZE       IDENTIFIER
+      0:      GUID_partition_scheme                        *1.0 TB     disk1
+      1:                        EFI EFI                     209.7 MB   disk1s1
+      2:                  Apple_HFS Baz                     499.6 GB   disk1s2
+      3:                 Apple_Boot Recovery HD             650.0 MB   disk1s3
+      4:       Microsoft Basic Data Qux                     250.2 GB   disk1s4
+      5:       Microsoft Basic Data Blah                    249.6 GB   disk1s5
+   /dev/disk2
+      #:                       TYPE NAME                    SIZE       IDENTIFIER
+      0:     FDisk_partition_scheme                        *4.0 GB     disk2
+      1:             Windows_FAT_32 NO NAME                 94.4 MB    disk2s1
+      2:                      Linux                         3.9 GB     disk2s5
+   #+END_SRC
+   You want the root of the one that's clearly an SD card---in this case,
+   =/dev/disk2=.[fn:disk-rdisk: In OS X, at least, what you /really/ want is
+   =/dev/rdisk2= when you're doing th writing. It's the raw disk, and it's
+   /much/ faster]
+
+4. Unmount the micro SD card:
+   #+BEGIN_SRC sh
+   $ diskutil unmountDisk /dev/disk2
+   #+END_SRC
+   Note that in your case, the disk number maybe be different!
+
+5. Write the image to the file:
+   #+BEGIN_SRC sh
+   $ sudo dd bs=1m if=~/Downloads/ArchLinuxARM-2014.06-rpi.img of=/dev/rdisk2
+   #+END_SRC
+   (That ~bs=1m~ line is pretty important, and on OS X, the =m= is in fact
+   lowercase.)
+   
+   This will take some time, but on OS X (and maybe Linux?), hitting CTRL-t
+   will show you that something is happening, e.g.
+   #+BEGIN_SRC plain
+   load: 1.72  cmd: dd 28927 uninterruptible 0.00u 0.19s
+   210+0 records in
+   209+0 records out
+   219152384 bytes transferred in 45.639970 secs (4801764 bytes/sec)
+   #+END_SRC
+   In my case, the process took almost 7 minutes.
+
+6. Unmount the disk again:
+   #+BEGIN_SRC sh
+   $ diskutil unmountDisk /dev/disk2
+   #+END_SRC
+
+7. Put it in the A+, and you're (sort of) on your way!
+
+
+** The instructions per the Arch Linux ARM folks[fn:source-sd-card: http://archlinuxarm.org/platforms/armv6/raspberry-pi on [2014-12-07 Sun]. These instructions seem to change often enough that it seems prudent to record them verbatim here.]
+Replace =<sdX>= in the following instructions with the device name for the SD card
 as it appears on your computer.
 
 1. Start fdisk to partition the SD card:
@@ -15,26 +105,318 @@ as it appears on your computer.
    c. Type =n=, then =p= for primary, =1= for the first partition on the drive,
       press ENTER to accept the default first sector, then type =+100M= for the
       last sector.
-Type t, then c to set the first partition to type W95 FAT32 (LBA).
-Type n, then p for primary, 2 for the second partition on the drive, and then
-press ENTER twice to accept the default first and last sector.
-Write the partition table and exit by typing w.
-Create and mount the FAT filesystem:
-mkfs.vfat /dev/<sdX>1
-mkdir boot
-mount /dev/<sdX>1 boot
-Create and mount the ext4 filesystem:
-mkfs.ext4 /dev/<sdX>2
-mkdir root
-mount /dev/<sdX>2 root
-Download and extract the root filesystem (as root, not via sudo):
-wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-latest.tar.gz
-bsdtar -xpf ArchLinuxARM-rpi-latest.tar.gz -C root
-sync
-Move boot files to the first partition:
-mv root/boot/* boot
-Unmount the two partitions:
-umount boot root
-Insert the SD card into the Raspberry Pi, connect ethernet, and apply 5V power.
-Use the serial console or SSH to the IP address given to the board by your
-router. The default root password is 'root'.
+   d. Type =t=, then =c= to set the first partition to type W95 FAT32 (LBA).
+   e. Type =n=, then =p= for primary, =2= for the second partition on the
+      drive, and then press ENTER twice to accept the default first and last
+      sector.
+   f. Write the partition table and exit by typing =w=.
+
+3. Create and mount the FAT filesystem:
+   #+BEGIN_SRC sh
+   $ mkfs.vfat /dev/<sdX>1
+   $ mkdir boot
+   $ mount /dev/<sdX>1 boot
+   #+END_SRC
+
+4. Create and mount the ext4 filesystem:
+   #+BEGIN_SRC sh
+   $ mkfs.ext4 /dev/<sdX>2
+   $ mkdir root
+   $ mount /dev/<sdX>2 root
+   #+END_SRC
+
+5. Download and extract the root filesystem (as root, not via sudo):
+   #+BEGIN_SRC sh
+   # wget http://archlinuxarm.org/os/ArchLinuxARM-rpi-latest.tar.gz
+   # bsdtar -xpf ArchLinuxARM-rpi-latest.tar.gz -C root
+   # sync
+   #+END_SRC
+
+6. Move boot files to the first partition:[fn:sd-card-shell-login-level: I'm
+   unclear whether or not this is as root or the user]
+   #+BEGIN_SRC sh
+   $ mv root/boot/* boot
+   #+END_SRC
+
+7. Unmount the two partitions:
+   #+BEGIN_SRC sh
+   $ umount boot root
+   #+END_SRC
+
+8. Insert the SD card into the Raspberry Pi, connect ethernet, and apply 5V
+   power.
+
+9. Use the serial console or SSH to the IP address given to the board by your
+   router. The default root password is 'root'.
+
+* Getting everything up and running
+
+** Turning it on
+You'll want a powered USB hub, a wired USB keyboard (I had problems with my USB
+transceiver-based Microsoft Sculpt, but no problems with my old Apple wired
+keyboard), and a USB wifi dongle (I've always had good luck with the Edimax
+ones---they're ubiquitious and therefore well supported).
+
+The login/password is =root=.
+
+** Wireless networking
+If you're using the Edimax wifi dongle, you shouldn't have any issues. Just
+check that it's connected with[fn:root-note: =#= means =root=, =$= means some
+user]
+#+BEGIN_SRC sh
+# dmesg | grep usbcore
+#+END_SRC
+or
+#+BEGIN_SRC sh
+# dmesg | grep rt18192cu
+#+END_SRC
+and hope you get results. If/when you do,
+#+BEGIN_SRC sh
+# cd /etc/netctl
+# cp examples/wireless-wpa <name>
+#+END_SRC
+Don't get too fancy with =<name>=---I had trouble with =matlock.home=, but not
+with =home=.
+
+** Add a user
+Might as well make yourself a member of =wheel= (this will come up later).
+
+** It's time to update Arch
+#+BEGIN_SRC sh
+# pacman -Syu
+#+END_SRC
+I couldn't even install =sudo= without this, so it's pretty important. Anyway,
+just say yes to everything (probably). It'll take awhile, but it'll also fix
+tha nasty bash bug (shellshock?) among other things. In my case, there were 103
+things that needed updating, which required downloading, unpacking, etc., so
+yeah, it took quite awhile. (Don't be alarmed if the screen turns off---it's
+just fallen asleep, so press a key to wake it up if you'd like.)
+
+That whole process took somewhere between 30 minutes and an hours, I think.
+
+** Install =sudo=
+#+BEGIN_SRC sh
+# pacman -S sudo
+#+END_SRC
+
+** Install =emacs=
+Because trying to find stuff in =nano= is terrible.
+#+BEGIN_SRC sh
+# pacman -S emacs
+#+END_SRC
+Ok, admittedly, 300+MB is a lot, especially when I haven't even expanded the
+filesystem yet, but I just can't wrap my mind around =vim= (nor do I especially
+want to).
+
+** Configure =sudo=
+You *must* use =visudo= to edit the configuration file for =sudo=, which lives
+at =/etc/sudoers=. Set =emacs= as the =visudo= editor:
+#+BEGIN_SRC sh
+# EDITOR=emacs visudo
+#+END_SRC
+
+To do this permanently, add these lines to the bottom of =/etc/sudoers=:
+#+BEGIN_SRC plain
+# reset environment by default
+Defaults env_reset
+# set default EDITOR to emacs, and do not allow visudo to use EDITOR/VISUAL
+Defaults editor=/usr/bin/emacs, !env_editor
+#+END_SRC
+Despite what https://wiki.archlinux.org/index.php/sudo#Defaults_Skeleton says,
+it looks like the =!env_editor=, as well as a new line saying =Defaults
+!env_editor= causes =visudo= to complain of a syntax error, so I guess you'll
+just have to ignore that for now.
+
+Now for the really important stuff: remember how you added yourself to the
+group =wheel= when you made your user account? =wheel= is generally taken to be
+the admin group. Find and uncomment the line
+#+BEGIN_SRC plain
+# %wheel ALL=(ALL) ALL
+#+END_SRC
+to give =wheel= members sudo privileges.
+
+Run
+#+BEGIN_SRC sh
+# sudo -ll
+#+END_SRC
+to verify that everything looks right.
+
+At this point, you should log out of =root= and log back in as =<user>=. As a
+result, the terminal prompt will be represented by =$= instead of =#=.
+
+*** Disabling =root= login
++This is pretty important, but I think you'll do it in a bit over SSH.+ No,
+just do this now.  See
+https://wiki.archlinux.org/index.php/sudo#Disable_root_login.
+
+Since you're now logged in as a user, we'll have to use =sudo= (and make sure
+you do this as a user instead of =root= to ensure you haven't messed anything
+up!!).
+#+BEGIN_SRC sh
+$ sudo passwd -l root
+#+END_SRC
+
+** Enable SSH access
+Check =systemctl= to see if an SSH daemon is running:
+#+BEGIN_SRC sh
+$ systemctl list-units | grep -i 'ssh'
+sshd.service      loaded active running  OpenSSH Daemon
+#+END_SRC
+(That second line is the output I got, which shows that yes, an SSH daemon is
+running.)
+
+Edit the SSH daemon config file with:
+#+BEGIN_SRC sh
+$ sudo emacs /etc/ssh/sshd_config
+#+END_SRC
+and add the lines
+#+BEGIN_SRC plain
+AllowGroups users wheel
+PermitRootLogin no
+
+# enable custom greeting
+Banner /etc/issue
+#+END_SRC
+and then edit =/etc/issue= to your custom greeting:
+#+BEGIN_SRC sh
+$ sudo emacs /etc/issue
+#+END_SRC
+
+** Change the hostname (optional, but recommended)
+#+BEGIN_SRC sh
+$ sudo hostnamectl set-hostname <new_hostname>
+#+END_SRC
+
+(I think you can also do this by editing +=/etc/hosts= and+ =/etc/hostname=, but
+using =hostnamectl= seems like the right way to do it.)
+
+** SSH issues
+At home, I had a problem with SSHing in like this:
+#+BEGIN_SRC sh
+$ ssh <me>@<hostname>
+#+END_SRC
+(we'll just say =foo@bar= now), so I went over to the Pi and tried:
+#+BEGIN_SRC sh
+$ ip a
+#+END_SRC
+and saw a line that looked like
+#+BEGIN_SRC plain
+   inet 10.0.1.<###>/<###> ...
+#+END_SRC
+and found that I could SSH in using
+#+BEGIN_SRC plain
+$ ssh foo@10.0.1.<###>
+#+END_SRC
+At work this doesn't seem to be a problem, and it probably just means I need to
+configure my home network properly.
+
+In any case, let's switch over to using the Pi through SSH.
+
+* Further necessary configuration
+** Install =git=
+#+BEGIN_SRC sh
+$ sudo pacman -S git
+#+END_SRC
+
+** Install =python= and useful related dependencies
+#+BEGIN_SRC sh
+$ sudo pacman -S python
+$ sudo pacman -S python-setuptools
+$ sudo pacman -S python-pip
+#+END_SRC
+
+** A note
+At this point I'm going to archive this image because I have not yet expanded
+the drive to fill the partition. This could be handy later as there's less to
+update, and I have important stuff like =sudo=, =emacs=, =git=, and =python=
+installed.
+
+** Add your GitHub SSH keys
+https://help.github.com/articles/generating-ssh-keys/
+
+** Set up bash how you like it
+
+** Expand the root partition
+Hopefully you've set things up so it's /really/ obvious when you're =root= now.
+
+1. Log in as =root=:
+   #+BEGIN_SRC sh
+   $ sudo su
+   #+END_SRC
+
+2. Run =fdisk=:
+   #+BEGIN_SRC sh
+   # fdisk /dev/mmcblk0
+   #+END_SRC
+
+3. Print the partition table by entering command =p=:
+   #+BEGIN_SRC plain
+   Welcome to fdisk (util-linux 2.25.2).
+   Changes will remain in memory only, until you decide to write them.
+   Be careful before using the write command.
+
+
+   Command (m for help): p
+   Disk /dev/mmcblk0: 3.7 GiB, 3965190144 bytes, 7744512 sectors
+   Units: sectors of 1 * 512 = 512 bytes
+   Sector size (logical/physical): 512 bytes / 512 bytes
+   I/O size (minimum/optimal): 512 bytes / 512 bytes
+   Disklabel type: dos
+   Disk identifier: 0x417ee54b
+
+   Device         Boot  Start     End Sectors  Size Id Type
+   /dev/mmcblk0p1        2048  186367  184320   90M  c W95 FAT32 (LBA)
+   /dev/mmcblk0p2      186368 3667967 3481600  1.7G  5 Extended
+   /dev/mmcblk0p5      188416 3667967 3479552  1.7G 83 Linux
+   #+END_SRC
+
+4. Delete partition 2 with command =d=, then selection =2=:
+   #+BEGIN_SRC plain
+   Command (m for help): d
+   Partition number (1,2,5, default 5): 2
+
+   Partition 2 has been deleted.
+   #+END_SRC
+
+5. Recreate the extended partition. Add a new partition with command =n=, then
+   selection =e=, then number =2=, then using the default selection at the next
+   two prompts by pressing =<ENTER>= for each:
+   #+BEGIN_SRC plain
+   Command (m for help): n
+   Partition type
+      p   primary (1 primary, 0 extended, 3 free)
+      e   extended (container for logical partitions)
+   Select (default p): e
+   Partition number (2-4, default 2): 2
+   First sector (186368-7744511, default 186368): 
+   Last sector, +sectors or +size{K,M,G,T,P} (186368-7744511, default 7744511): 
+
+   Created a new partition 2 of type 'Extended' and of size 3.6 GiB.
+   #+END_SRC
+
+6. Delete the root partition with command =d=, then selection =5=.
+   #+BEGIN_SRC plain
+   Command (m for help): d   
+   Partition number (1,2,5, default 5): 5
+
+   Partition 5 has been deleted.
+   #+END_SRC
+
+7. Recreate the root partition following a similar process to creating the
+   extended partition. Add a new partition with command =n=, then selection
+   =l=, then =<ENTER>= for the next two prompts:
+   #+BEGIN_SRC plain
+   Command (m for help): n
+   Partition type
+      p   primary (1 primary, 1 extended, 2 free)
+      l   logical (numbered from 5)
+   Select (default p): l
+
+   Adding logical partition 5
+   First sector (188416-7744511, default 188416): 
+   Last sector, +sectors or +size{K,M,G,T,P} (188416-7744511, default 7744511): 
+
+   Created a new partition 5 of type 'Linux' and of size 3.6 GiB.
+   #+END_SRC
+
+
